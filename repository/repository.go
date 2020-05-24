@@ -1,4 +1,4 @@
-package firestoreRepository
+package repository
 
 import (
 	"gitlab.com/kentanggoreng/quip-server/entity"

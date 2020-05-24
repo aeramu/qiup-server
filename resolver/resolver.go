@@ -3,7 +3,7 @@ package resolver
 import(
 	//"gitlab.com/kentanggoreng/quip-server/entity"
 	"gitlab.com/kentanggoreng/quip-server/service"
-	repository "gitlab.com/kentanggoreng/quip-server/repository"
+	"gitlab.com/kentanggoreng/quip-server/repository"
 )
 
 type Resolver struct{}
@@ -34,7 +34,7 @@ func (r *Resolver) Login(args struct{
 	if account == nil {
 		return "email not registered"
 	}
-	if args.Password != account.Email {
+	if args.Password != account.Password {
 		return "wrong password"
 	}
 	return service.GenerateJWT(account.ID)
