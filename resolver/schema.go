@@ -15,5 +15,3 @@ var Schema = `
 func (r *Resolver) Hello()(string){
 	return "Hello world!"
 }
-
-func (r *Resolver)
