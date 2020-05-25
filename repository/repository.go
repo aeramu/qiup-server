@@ -27,11 +27,11 @@ func NewAccountRepository()(AccountRepository){
 
 // Class for account repository implementation
 type AccountRepositoryImplementation struct{
-	client *firestore.Client
+	client *mongo.Client
 }
 
 func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName string, indexValue string) (*entity.Account, error){
-	collection := client.Database("quip").Collection("account")
+	collection := repository.client.Database("quip").Collection("account")
 	
 	var account entity.Account
 	collection.FindOne(context.TODO(),bson.D{{indexName,indexValue}}).Decode(&account)
@@ -39,5 +39,5 @@ func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName stri
 	if account.ID == "" {
 		return nil, nil
 	}
-	return account, nil
+	return &account, nil
 }
