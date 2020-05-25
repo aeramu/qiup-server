@@ -1,13 +1,13 @@
 package repository
 
 import (
-	"gitlab.com/kentanggoreng/quip-server/entity"
-  
 	"context"
 
-	firebase "firebase.google.com/go"
-	"cloud.google.com/go/firestore"
-	"google.golang.org/api/option"
+	"gitlab.com/kentanggoreng/quip-server/entity"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // interface for account repository
@@ -17,9 +17,9 @@ type AccountRepository interface{
 
 // Constructor for AccountRepository
 func NewAccountRepository()(AccountRepository){
-	credential := option.WithCredentialsFile("credential.json")
-	app,_ := firebase.NewApp(context.Background(), nil, credential)
-	client,_ := app.Firestore(context.Background())
+	client,_ := mongo.Connect(context.Background(), options.Client().ApplyURI(
+		"mongodb+srv://admin:admin@quip-wrbox.mongodb.net/",
+	))
 	return &AccountRepositoryImplementation{
 		client: client,
 	}
@@ -31,15 +31,13 @@ type AccountRepositoryImplementation struct{
 }
 
 func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName string, indexValue string) (*entity.Account, error){
-	data, err := repository.client.Collection("account").Where(indexName, "==", indexValue).Documents(context.Background()).Next()
-	if err != nil{
-		return nil, err
-	}
-	return &entity.Account{
-		ID: data.Ref.ID,
-		Email: data.Data()["Email"].(string),
-		Username: data.Data()["Username"].(string),
-		Password: data.Data()["Password"].(string),
-	}, nil
-}
+	collection := client.Database("quip").Collection("account")
+	
+	var account entity.Account
+	collection.FindOne(context.TODO(),bson.D{{indexName,indexValue}}).Decode(&account)
 
+	if account.ID == "" {
+		return nil, nil
+	}
+	return account, nil
+}
