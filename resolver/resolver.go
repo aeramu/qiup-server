@@ -81,6 +81,25 @@ func (r *Resolver) Register(args struct{
 	return service.GenerateJWT(account.ID)
 }
 
+func (r *Resolver) ChangeProfile(ctx context.Context, args struct{
+	Name string
+	Password string
+})(*ProfileResolver){
+	token := ctx.Value("token").(string)
+
+	account := &entity.Account{
+		Profile: &entity.Profile{
+			Name: args.Name,
+			Password: args.Password,
+		},
+	}
+
+	accountRepository := repository.NewAccountRepository()
+	account = accountRepository.UpdateData(service.DecodeJWT(token),account)
+
+	return &ProfileResolver{account.Profile}
+}
+
 func (r *Resolver) Account(args struct{
 	ID graphql.ID
 })(*AccountResolver){
