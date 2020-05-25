@@ -31,7 +31,7 @@ func (r *Resolver) Login(args struct{
 	Password string
 })(string){
 	accountRepository := repository.NewAccountRepository()
-	account,_ := accountRepository.GetDataByIndex("email",args.Email)
+	account := accountRepository.GetDataByIndex("email",args.Email)
 	if account == nil {
 		return "email not registered"
 	}
@@ -46,14 +46,21 @@ func (r *Resolver) Register(args struct{
 	Username string
 	Password string
 })(string){
+	accountRepository := repository.NewAccountRepository()
+
+	if accountRepository.GetDataByIndex("email",args.Email) != nil {
+		return "email already registered"
+	}
+	if accountRepository.GetDataByIndex("username",args.Username) != nil {
+		return "username already registered"
+	}
+
 	account := &entity.Account{
 		ID: service.GenerateUUID(),
 		Email: args.Email,
 		Username: args.Username,
 		Password: args.Password,
 	}
-
-	accountRepository := repository.NewAccountRepository()
 	accountRepository.PutData(account)
 
 	return service.GenerateJWT(account.ID)

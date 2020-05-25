@@ -12,7 +12,7 @@ import (
 
 // interface for account repository
 type AccountRepository interface{
-	GetDataByIndex(indexName string, indexValue string) (*entity.Account, error)
+	GetDataByIndex(indexName string, indexValue string) (*entity.Account)
 	PutData(account *entity.Account) (error)
 }
 
@@ -31,16 +31,16 @@ type AccountRepositoryImplementation struct{
 	client *mongo.Client
 }
 
-func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName string, indexValue string) (*entity.Account, error){
+func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName string, indexValue string) (*entity.Account){
 	collection := repository.client.Database("quip").Collection("account")
 	
 	var account entity.Account
 	collection.FindOne(context.TODO(),bson.D{{indexName,indexValue}}).Decode(&account)
 
 	if account.ID == "" {
-		return nil, nil
+		return nil
 	}
-	return &account, nil
+	return &account
 }
 
 func (repository *AccountRepositoryImplementation) PutData(account *entity.Account)(error){
