@@ -26,11 +26,11 @@ var Schema = `
 		id: ID!
 		email: String!
 		username: String!
-		profile: Profile
+		profile: Profile!
 	}
 	type Profile{
-		name: String
-		bio: String
+		name: String!
+		bio: String!
 	}
 `
 
@@ -107,8 +107,14 @@ type ProfileResolver struct{
 	profile *entity.Profile
 }
 func (r *ProfileResolver) Name()(string){
+	if r.profile == nil{
+		return ""
+	}
 	return r.profile.Name
 }
 func (r *ProfileResolver) Bio()(string){
+	if r.profile == nil{
+		return ""
+	}
 	return r.profile.Bio
 }

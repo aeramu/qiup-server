@@ -5,7 +5,7 @@ type Account struct{
 	Email string
 	Username string
 	Password string
-	Profile Profile
+	Profile *Profile
 }
 
 type Profile struct{
