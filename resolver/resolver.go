@@ -1,7 +1,7 @@
 package resolver
 
 import(
-	//"gitlab.com/kentanggoreng/quip-server/entity"
+	"gitlab.com/kentanggoreng/quip-server/entity"
 	"gitlab.com/kentanggoreng/quip-server/service"
 	"gitlab.com/kentanggoreng/quip-server/repository"
 )
@@ -18,6 +18,7 @@ var Schema = `
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
+		register(email: String!, username: String!, password: String!): String!
 	}
 `
 
@@ -37,5 +38,23 @@ func (r *Resolver) Login(args struct{
 	if args.Password != account.Password {
 		return "wrong password"
 	}
+	return service.GenerateJWT(account.ID)
+}
+
+func (r *Resolver) Register(args struct{
+	Email string
+	Username string
+	Password string
+})(string){
+	account := &entity.Account{
+		ID: service.GenerateUUID(),
+		Email: args.Email,
+		Username: args.Username,
+		Password: args.Password,
+	}
+
+	accountRepository := repository.NewAccountRepository()
+	accountRepository.PutData(account)
+
 	return service.GenerateJWT(account.ID)
 }
