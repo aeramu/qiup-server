@@ -14,6 +14,7 @@ import (
 type AccountRepository interface{
 	GetDataByIndex(indexName string, indexValue string) (*entity.Account)
 	PutData(account *entity.Account) (error)
+	UpdateData(accountID string, account *entity.Account) (*entity.Account)
 }
 
 // Constructor for AccountRepository
@@ -48,4 +49,13 @@ func (repository *AccountRepositoryImplementation) PutData(account *entity.Accou
 	collection.InsertOne(context.TODO(),account)
 
 	return nil
+}
+
+func (repository *AccountRepositoryImplementation) UpdateData(accountID string, account *entity.Account) (*entity.Account){
+	collection := repository.client.Database("quip").Collection("account")
+	collection.UpdateOne(context.TODO(),bson.D{{"id",accountID}},bson.D{{
+		$set, account
+	}}).Decode(&account)
+
+	return &account
 }
