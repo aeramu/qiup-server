@@ -23,7 +23,7 @@ var Schema = `
 	type Mutation{
 		login(email: String!, password: String!): String!
 		register(email: String!, username: String!, password: String!): String!
-		changeProfile(name: String, bio: String): Profile!
+		changeProfile(name: String!, bio: String!): Profile!
 	}
 	type Account{
 		id: ID!
@@ -83,21 +83,18 @@ func (r *Resolver) Register(args struct{
 
 func (r *Resolver) ChangeProfile(ctx context.Context, args struct{
 	Name string
-	Password string
+	Bio string
 })(*ProfileResolver){
 	token := ctx.Value("token").(string)
 
-	account := &entity.Account{
-		Profile: &entity.Profile{
-			Name: args.Name,
-			Password: args.Password,
-		},
+	profile := &entity.Profile{
+		Name: args.Name,
+		Bio: args.Bio,
 	}
 
 	accountRepository := repository.NewAccountRepository()
-	account = accountRepository.UpdateData(service.DecodeJWT(token),account)
-
-	return &ProfileResolver{account.Profile}
+	accountRepository.UpdateData(service.DecodeJWT(token),"profile",profile)
+	return &ProfileResolver{profile}
 }
 
 func (r *Resolver) Account(args struct{

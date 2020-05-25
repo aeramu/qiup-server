@@ -12,9 +12,9 @@ import (
 
 // interface for account repository
 type AccountRepository interface{
-	GetDataByIndex(indexName string, indexValue string) (*entity.Account)
+	GetDataByIndex(indexName string, indexValue interface{}) (*entity.Account)
 	PutData(account *entity.Account) (error)
-	UpdateData(accountID string, account *entity.Account) (*entity.Account)
+	UpdateData(accountID string, indexName string, indexValue interface{}) (error)
 }
 
 // Constructor for AccountRepository
@@ -32,7 +32,7 @@ type AccountRepositoryImplementation struct{
 	client *mongo.Client
 }
 
-func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName string, indexValue string) (*entity.Account){
+func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{}) (*entity.Account){
 	collection := repository.client.Database("quip").Collection("account")
 	
 	var account entity.Account
@@ -51,11 +51,9 @@ func (repository *AccountRepositoryImplementation) PutData(account *entity.Accou
 	return nil
 }
 
-func (repository *AccountRepositoryImplementation) UpdateData(accountID string, account *entity.Account) (*entity.Account){
+func (repository *AccountRepositoryImplementation) UpdateData(accountID string, indexName string, indexValue interface{}) (error){
 	collection := repository.client.Database("quip").Collection("account")
-	collection.UpdateOne(context.TODO(),bson.D{{"id",accountID}},bson.D{{
-		$set, account
-	}}).Decode(&account)
+	collection.UpdateOne(context.TODO(),bson.D{{"id",accountID}},bson.D{{"$set", bson.D{{indexName, indexValue}}}})
 
-	return &account
+	return nil
 }
