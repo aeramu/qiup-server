@@ -1,6 +1,7 @@
 package resolver
 
 import(
+	"context"
 	"gitlab.com/kentanggoreng/quip-server/entity"
 	"gitlab.com/kentanggoreng/quip-server/service"
 	"gitlab.com/kentanggoreng/quip-server/repository"
@@ -83,6 +84,15 @@ func (r *Resolver) Account(args struct{
 })(*AccountResolver){
 	accountRepository := repository.NewAccountRepository()
 	account := accountRepository.GetDataByIndex("id",string(args.ID))
+
+	return &AccountResolver{account}
+}
+
+func (r *Resolver) Me(ctx context.Context)(*AccountResolver){
+	token := ctx.Value("token").(string)
+
+	accountRepository := repository.NewAccountRepository()
+	account := accountRepository.GetDataByIndex("id",service.DecodeJWT(token))
 
 	return &AccountResolver{account}
 }
