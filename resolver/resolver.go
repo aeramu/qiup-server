@@ -102,3 +102,13 @@ func (r *AccountResolver) Username()(string){
 func (r *AccountResolver) Profile()(*ProfileResolver){
 	return &ProfileResolver{r.account.Profile}
 }
+
+type ProfileResolver struct{
+	profile *entity.Profile
+}
+func (r *ProfileResolver) Name()(string){
+	return r.profile.Name
+}
+func (r *ProfileResolver) Bio()(string){
+	return r.profile.Bio
+}
