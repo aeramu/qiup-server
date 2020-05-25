@@ -76,3 +76,8 @@ func (r *Resolver) Register(args struct{
 
 	return service.GenerateJWT(account.ID)
 }
+
+func (r *Resolver) Account(args struct{
+	ID graphql.ID
+
+})
