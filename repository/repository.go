@@ -13,6 +13,7 @@ import (
 // interface for account repository
 type AccountRepository interface{
 	GetDataByIndex(indexName string, indexValue string) (*entity.Account, error)
+	PutData(account *entity.Account) (error)
 }
 
 // Constructor for AccountRepository
@@ -40,4 +41,11 @@ func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName stri
 		return nil, nil
 	}
 	return &account, nil
+}
+
+func (repository *AccountRepositoryImplementation) PutData(account *entity.Account)(error){
+	collection := repository.client.Database("quip").Collection("account")
+	collection.InsertOne(context.TODO(),account)
+
+	return nil
 }

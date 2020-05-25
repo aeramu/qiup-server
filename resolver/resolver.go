@@ -31,7 +31,7 @@ func (r *Resolver) Login(args struct{
 	Password string
 })(string){
 	accountRepository := repository.NewAccountRepository()
-	account,_ := accountRepository.GetDataByIndex("Email",args.Email)
+	account,_ := accountRepository.GetDataByIndex("email",args.Email)
 	if account == nil {
 		return "email not registered"
 	}
