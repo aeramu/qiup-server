@@ -18,6 +18,7 @@ var Schema = `
   	type Query{
 		hello: String!
 		account(id: ID!): Account
+		me: Account
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
