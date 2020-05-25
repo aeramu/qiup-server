@@ -4,6 +4,7 @@ import(
 	"gitlab.com/kentanggoreng/quip-server/entity"
 	"gitlab.com/kentanggoreng/quip-server/service"
 	"gitlab.com/kentanggoreng/quip-server/repository"
+	"github.com/graph-gophers/graphql-go"
 )
 
 type Resolver struct{}
@@ -79,5 +80,25 @@ func (r *Resolver) Register(args struct{
 
 func (r *Resolver) Account(args struct{
 	ID graphql.ID
+})(*AccountResolver){
+	accountRepository := repository.NewAccountRepository()
+	account := accountRepository.GetDataByIndex("id",string(args.ID))
 
-})
+	return &AccountResolver{account}
+}
+
+type AccountResolver struct{
+	account *entity.Account
+}
+func (r *AccountResolver) ID()(graphql.ID){
+	return graphql.ID(r.account.ID)
+}
+func (r *AccountResolver) Email()(string){
+	return r.account.Email
+}
+func (r *AccountResolver) Username()(string){
+	return r.account.Username
+}
+func (r *AccountResolver) Profile()(*ProfileResolver){
+	return &ProfileResolver{r.account.Profile}
+}
