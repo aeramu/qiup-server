@@ -15,10 +15,21 @@ var Schema = `
   	}
   	type Query{
 		hello: String!
+		account(id: ID!): Account
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
 		register(email: String!, username: String!, password: String!): String!
+	}
+	type Account{
+		id: ID!
+		email: String!
+		username: String!
+		profile: Profile
+	}
+	type Profile{
+		name: String
+		bio: String
 	}
 `
 
