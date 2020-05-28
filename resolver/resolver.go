@@ -105,7 +105,7 @@ func (r *Resolver) Account(args struct{
 	ID graphql.ID
 })(*AccountResolver){
 	accountRepository := repository.NewAccountRepository()
-	account := accountRepository.GetDataByIndex("id",string(args.ID))
+	account := accountRepository.GetDataByIndex("_id",string(args.ID))
 
 	return &AccountResolver{account}
 }
@@ -114,7 +114,7 @@ func (r *Resolver) Me(ctx context.Context)(*AccountResolver){
 	token := ctx.Value("token").(string)
 
 	accountRepository := repository.NewAccountRepository()
-	account := accountRepository.GetDataByIndex("id",service.DecodeJWT(token))
+	account := accountRepository.GetDataByIndex("_id",service.DecodeJWT(token))
 
 	return &AccountResolver{account}
 }
