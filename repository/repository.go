@@ -53,7 +53,7 @@ func (repository *AccountRepositoryImplementation) PutData(account *entity.Accou
 
 func (repository *AccountRepositoryImplementation) UpdateData(accountID string, indexName string, indexValue interface{}) (*entity.Account){
 	collection := repository.client.Database("quip").Collection("account")
-	collection.UpdateOne(context.TODO(),bson.D{{"id",accountID}},bson.D{{"$set", bson.D{{indexName, indexValue}}}})
+	collection.UpdateOne(context.TODO(),bson.D{{"_id",accountID}},bson.D{{"$set", bson.D{{indexName, indexValue}}}})
 
 	var account entity.Account
 	collection.FindOne(context.TODO(),bson.D{{indexName,indexValue}}).Decode(&account)
