@@ -79,9 +79,9 @@ func (r *Resolver) Register(args struct{
 		Username: args.Username,
 		Password: args.Password,
 	}
-	ID := accountRepository.PutData(account)
+	accountRepository.PutData(account)
 
-	return service.GenerateJWT(ID)
+	return service.GenerateJWT(account.ID)
 }
 
 func (r *Resolver) EditProfile(ctx context.Context, args struct{
