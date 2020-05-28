@@ -23,7 +23,7 @@ var Schema = `
 	type Mutation{
 		login(email: String!, password: String!): String!
 		register(email: String!, username: String!, password: String!): String!
-		changeProfile(name: String!, bio: String!): Profile!
+		editProfile(name: String!, bio: String!): Account!
 	}
 	type Account{
 		id: ID!
@@ -48,10 +48,10 @@ func (r *Resolver) Login(args struct{
 	accountRepository := repository.NewAccountRepository()
 	account := accountRepository.GetDataByIndex("email",args.Email)
 	if account == nil {
-		return "email not registered"
+		return "Email not registered"
 	}
 	if args.Password != account.Password {
-		return "wrong password"
+		return "Wrong password"
 	}
 	return service.GenerateJWT(account.ID)
 }
@@ -64,10 +64,10 @@ func (r *Resolver) Register(args struct{
 	accountRepository := repository.NewAccountRepository()
 
 	if accountRepository.GetDataByIndex("email",args.Email) != nil {
-		return "email already registered"
+		return "Email already registered"
 	}
 	if accountRepository.GetDataByIndex("username",args.Username) != nil {
-		return "username already registered"
+		return "Username already registered"
 	}
 
 	account := &entity.Account{
@@ -76,15 +76,15 @@ func (r *Resolver) Register(args struct{
 		Username: args.Username,
 		Password: args.Password,
 	}
-	accountRepository.PutData(account)
+	ID := accountRepository.PutData(account)
 
-	return service.GenerateJWT(account.ID)
+	return service.GenerateJWT(ID)
 }
 
-func (r *Resolver) ChangeProfile(ctx context.Context, args struct{
+func (r *Resolver) EditProfile(ctx context.Context, args struct{
 	Name string
 	Bio string
-})(*ProfileResolver){
+})(*AccountResolver){
 	token := ctx.Value("token").(string)
 
 	profile := &entity.Profile{
@@ -93,8 +93,9 @@ func (r *Resolver) ChangeProfile(ctx context.Context, args struct{
 	}
 
 	accountRepository := repository.NewAccountRepository()
-	accountRepository.UpdateData(service.DecodeJWT(token),"profile",profile)
-	return &ProfileResolver{profile}
+	account := accountRepository.UpdateData(service.DecodeJWT(token),"profile",profile)
+	
+	return &AccountResolver{account}
 }
 
 func (r *Resolver) Account(args struct{

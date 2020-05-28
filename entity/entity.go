@@ -1,7 +1,7 @@
 package entity
 
 type Account struct{
-	ID string
+	ID string `bson:"_id"`
 	Email string
 	Username string
 	Password string

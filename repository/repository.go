@@ -13,8 +13,8 @@ import (
 // interface for account repository
 type AccountRepository interface{
 	GetDataByIndex(indexName string, indexValue interface{}) (*entity.Account)
-	PutData(account *entity.Account) (error)
-	UpdateData(accountID string, indexName string, indexValue interface{}) (error)
+	PutData(account *entity.Account) (string)
+	UpdateData(accountID string, indexName string, indexValue interface{}) (*entity.Account)
 }
 
 // Constructor for AccountRepository
@@ -44,16 +44,19 @@ func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName stri
 	return &account
 }
 
-func (repository *AccountRepositoryImplementation) PutData(account *entity.Account)(error){
+func (repository *AccountRepositoryImplementation) PutData(account *entity.Account)(string){
 	collection := repository.client.Database("quip").Collection("account")
-	collection.InsertOne(context.TODO(),account)
+	result,_ := collection.InsertOne(context.TODO(),account)
 
-	return nil
+	return result.InsertedID.(string)
 }
 
-func (repository *AccountRepositoryImplementation) UpdateData(accountID string, indexName string, indexValue interface{}) (error){
+func (repository *AccountRepositoryImplementation) UpdateData(accountID string, indexName string, indexValue interface{}) (*entity.Account){
 	collection := repository.client.Database("quip").Collection("account")
 	collection.UpdateOne(context.TODO(),bson.D{{"id",accountID}},bson.D{{"$set", bson.D{{indexName, indexValue}}}})
 
-	return nil
+	var account entity.Account
+	collection.FindOne(context.TODO(),bson.D{{indexName,indexValue}}).Decode(&account)
+
+	return &account
 }
