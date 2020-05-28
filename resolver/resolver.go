@@ -48,7 +48,10 @@ func (r *Resolver) Login(args struct{
 	accountRepository := repository.NewAccountRepository()
 	account := accountRepository.GetDataByIndex("email",args.Email)
 	if account == nil {
-		return "Email not registered"
+		account = accountRepository.GetDataByIndex("username",args.Email)
+		if account == nil{
+			return "Email or username not registered"
+		}
 	}
 	if args.Password != account.Password {
 		return "Wrong password"
@@ -94,7 +97,7 @@ func (r *Resolver) EditProfile(ctx context.Context, args struct{
 
 	accountRepository := repository.NewAccountRepository()
 	account := accountRepository.UpdateData(service.DecodeJWT(token),"profile",profile)
-	
+
 	return &AccountResolver{account}
 }
 
