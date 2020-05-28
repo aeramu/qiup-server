@@ -53,7 +53,7 @@ func (r *Resolver) Login(args struct{
 			return "Email or username not registered"
 		}
 	}
-	if args.Password != account.Password {
+	if service.Hash(args.Password) != account.Password {
 		return "Wrong password"
 	}
 	return service.GenerateJWT(account.ID)
@@ -77,7 +77,7 @@ func (r *Resolver) Register(args struct{
 		ID: service.GenerateUUID(),
 		Email: args.Email,
 		Username: args.Username,
-		Password: args.Password,
+		Password: service.Hash(args.Password),
 	}
 	accountRepository.PutData(account)
 
