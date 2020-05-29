@@ -11,4 +11,5 @@ type Account struct{
 type Profile struct{
 	Name string
 	Bio string
+	ProfilePhoto string
 }

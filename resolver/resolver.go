@@ -19,11 +19,12 @@ var Schema = `
 		hello: String!
 		account(id: ID!): Account
 		me: Account!
+		uploadURL(directory: String!, contentType: String!): String!
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
 		register(email: String!, username: String!, password: String!): String!
-		editProfile(name: String!, bio: String!): Account!
+		editProfile(name: String!, bio: String!, profilePhoto: String!): Account!
 	}
 	type Account{
 		id: ID!
@@ -65,14 +66,12 @@ func (r *Resolver) Register(args struct{
 	Password string
 })(string){
 	accountRepository := repository.NewAccountRepository()
-
 	if accountRepository.GetDataByIndex("email",args.Email) != nil {
 		return "Email already registered"
 	}
 	if accountRepository.GetDataByIndex("username",args.Username) != nil {
 		return "Username already registered"
 	}
-
 	account := &entity.Account{
 		ID: service.GenerateUUID(),
 		Email: args.Email,
@@ -80,25 +79,33 @@ func (r *Resolver) Register(args struct{
 		Password: service.Hash(args.Password),
 	}
 	accountRepository.PutData(account)
-
 	return service.GenerateJWT(account.ID)
 }
 
 func (r *Resolver) EditProfile(ctx context.Context, args struct{
 	Name string
 	Bio string
+	ProfilePhoto string
 })(*AccountResolver){
 	token := ctx.Value("token").(string)
-
 	profile := &entity.Profile{
 		Name: args.Name,
 		Bio: args.Bio,
+		ProfilePhoto: args.ProfilePhoto,
 	}
-
 	accountRepository := repository.NewAccountRepository()
 	account := accountRepository.UpdateData(service.DecodeJWT(token),"profile",profile)
-
 	return &AccountResolver{account}
+}
+
+func (r *Resolver) UploadURL(args struct{
+	Directory string
+	ContentType string
+})(string){
+	directory := args.Directory + "/" + service.GenerateUUID() + "." + args.ContentType
+	s3Repository := repository.NewS3Repository()
+	url := s3Repository.PutFileURL(directory)
+	return url
 }
 
 func (r *Resolver) Account(args struct{
@@ -106,16 +113,13 @@ func (r *Resolver) Account(args struct{
 })(*AccountResolver){
 	accountRepository := repository.NewAccountRepository()
 	account := accountRepository.GetDataByIndex("_id",string(args.ID))
-
 	return &AccountResolver{account}
 }
 
 func (r *Resolver) Me(ctx context.Context)(*AccountResolver){
 	token := ctx.Value("token").(string)
-
 	accountRepository := repository.NewAccountRepository()
 	account := accountRepository.GetDataByIndex("_id",service.DecodeJWT(token))
-
 	return &AccountResolver{account}
 }
 
