@@ -35,6 +35,7 @@ var Schema = `
 	type Profile{
 		name: String!
 		bio: String!
+		profilePhoto: String!
 	}
 `
 
@@ -153,4 +154,10 @@ func (r *ProfileResolver) Bio()(string){
 		return ""
 	}
 	return r.profile.Bio
+}
+func (r *ProfileResolver) ProfilePhoto()(string){
+	if r.profile == nil{
+		return ""
+	}
+	return r.profile.ProfilePhoto
 }
