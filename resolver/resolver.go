@@ -23,7 +23,7 @@ var Schema = `
 	type Mutation{
 		login(email: String!, password: String!): String!
 		register(email: String!, username: String!, password: String!): String!
-		editProfile(name: String!, bio: String!, profilePhoto: String!): Account!
+		editProfile(name: String!, bio: String!, profilePhoto: String!, coverPhoto: String!): Account!
 		uploadImage(directory: String!): String!
 	}
 	type Account{
@@ -36,6 +36,7 @@ var Schema = `
 		name: String!
 		bio: String!
 		profilePhoto: String!
+		coverPhoto: String!
 	}
 `
 
@@ -87,12 +88,14 @@ func (r *Resolver) EditProfile(ctx context.Context, args struct{
 	Name string
 	Bio string
 	ProfilePhoto string
+	CoverPhoto string
 })(*AccountResolver){
 	token := ctx.Value("token").(string)
 	profile := &entity.Profile{
 		Name: args.Name,
 		Bio: args.Bio,
 		ProfilePhoto: args.ProfilePhoto,
+		CoverPhoto: args.CoverPhoto,
 	}
 	accountRepository := repository.NewAccountRepository()
 	account := accountRepository.UpdateData(service.DecodeJWT(token),"profile",profile)
@@ -159,4 +162,10 @@ func (r *ProfileResolver) ProfilePhoto()(string){
 		return ""
 	}
 	return r.profile.ProfilePhoto
+}
+func (r *ProfileResolver) CoverPhoto()(string){
+	if r.profile == nil{
+		return ""
+	}
+	return r.profile.CoverPhoto
 }

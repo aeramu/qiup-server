@@ -12,4 +12,5 @@ type Profile struct{
 	Name string
 	Bio string
 	ProfilePhoto string
+	CoverPhoto string
 }
