@@ -8,7 +8,7 @@ import (
 )
 
 type S3Repository interface{
-	PutFileURL(fileName string)(string)
+	PutImage(directory string)(string)
 }
 
 func NewS3Repository()(S3Repository){
@@ -21,11 +21,12 @@ type S3RepositoryImplementation struct{
 	client *s3.S3
 }
 
-func (repository *S3RepositoryImplementation) PutFileURL(directory string)(string){
+func (repository *S3RepositoryImplementation) PutImage(directory string)(string){
 	req,_ := repository.client.PutObjectRequest(&s3.PutObjectInput{
         Bucket: aws.String("qiup-image"),
 		Key: aws.String(directory),
 		ACL: aws.String("public-read"),
+		ContentType: aws.String("image/jpeg"),
     })
     url,_ := req.Presign(15 * time.Minute)
     return url

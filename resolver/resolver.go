@@ -19,12 +19,12 @@ var Schema = `
 		hello: String!
 		account(id: ID!): Account
 		me: Account!
-		uploadURL(directory: String!, contentType: String!): String!
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
 		register(email: String!, username: String!, password: String!): String!
 		editProfile(name: String!, bio: String!, profilePhoto: String!): Account!
+		uploadImage(directory: String!): String!
 	}
 	type Account{
 		id: ID!
@@ -99,13 +99,12 @@ func (r *Resolver) EditProfile(ctx context.Context, args struct{
 	return &AccountResolver{account}
 }
 
-func (r *Resolver) UploadURL(args struct{
+func (r *Resolver) UploadImage(args struct{
 	Directory string
-	ContentType string
 })(string){
-	directory := args.Directory + "/" + service.GenerateUUID() + "." + args.ContentType
+	directory := args.Directory + "/" + service.GenerateUUID() + ".jpg"
 	s3Repository := repository.NewS3Repository()
-	url := s3Repository.PutFileURL(directory)
+	url := s3Repository.PutImage(directory)
 	return url
 }
 
