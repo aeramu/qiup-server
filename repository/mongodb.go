@@ -2,9 +2,7 @@ package repository
 
 import (
 	"context"
-
-	"gitlab.com/kentanggoreng/quip-server/entity"
-
+	"github.com/aeramu/qiup-server/entity"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson"

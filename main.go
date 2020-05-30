@@ -3,9 +3,7 @@ package main
 import(
   	"context"
   	"encoding/json"
-
-  	"gitlab.com/kentanggoreng/quip-server/resolver"
-
+  	"github.com/aeramu/qiup-server/resolver"
   	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
  	"github.com/graph-gophers/graphql-go"

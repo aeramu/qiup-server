@@ -2,9 +2,9 @@ package resolver
 
 import(
 	"context"
-	"gitlab.com/kentanggoreng/quip-server/entity"
-	"gitlab.com/kentanggoreng/quip-server/service"
-	"gitlab.com/kentanggoreng/quip-server/repository"
+	"github.com/aeramu/qiup-server/entity"
+	"github.com/aeramu/qiup-server/service"
+	"github.com/aeramu/qiup-server/repository"
 	"github.com/graph-gophers/graphql-go"
 )
 
