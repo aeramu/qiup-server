@@ -1,6 +1,7 @@
 package resolver
 
 import(
+	"context"
 	"github.com/aeramu/qiup-server/entity"
 	"github.com/aeramu/qiup-server/service"
 	"github.com/aeramu/qiup-server/repository"
@@ -15,6 +16,13 @@ func (r *AccountResolver) ID()(graphql.ID){
 }
 func (r *AccountResolver) Email()(string){
 	return r.account.Email
+}
+
+func (r *Resolver) MyAccount(ctx context.Context)(*AccountResolver){
+	token := ctx.Value("token").(string)
+	accountRepository := repository.NewAccountRepository()
+	account := accountRepository.GetDataByIndex("_id",service.DecodeJWT(token))
+	return &AccountResolver{account}
 }
 
 func (r *Resolver) IsEmailAvailable(args struct{

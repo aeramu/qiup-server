@@ -8,13 +8,16 @@ var Schema = `
 		mutation: Mutation
   	}
   	type Query{
+		myAccount: Account!
 		isEmailAvailable(email: String!): Boolean!
+
 		account(id: ID!): Account
 		me: Account!
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
 		register(email: String!, password: String!): String!
+
 		editProfile(name: String!, bio: String!, profilePhoto: String!, coverPhoto: String!): Account!
 		uploadImage(directory: String!): String!
 		isUsernameAvailable(username: String!): Boolean!
