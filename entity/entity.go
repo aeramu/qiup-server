@@ -7,6 +7,8 @@ type Account struct{
 }
 
 type Profile struct{
+	ID string `bson:"_id"`
+	Username string
 	Name string
 	Bio string
 	ProfilePhoto string
