@@ -7,7 +7,7 @@ import (
     "github.com/friendsofgo/graphiql"
     "github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
-	"gitlab.com/kentanggoreng/quip-server/resolver"
+	"github.com/aeramu/qiup-server/resolver"
 )
 
 func main() {
