@@ -25,6 +25,36 @@ func (r *Resolver) EditProfile(ctx context.Context, args struct{
 	return &AccountResolver{account}
 }
 
+
+func (r *Resolver) Account(args struct{
+	ID graphql.ID
+})(*AccountResolver){
+	accountRepository := repository.NewAccountRepository()
+	account := accountRepository.GetDataByIndex("_id",string(args.ID))
+	return &AccountResolver{account}
+}
+
+
+func (r *Resolver) Me(ctx context.Context)(*AccountResolver){
+	token := ctx.Value("token").(string)
+	accountRepository := repository.NewAccountRepository()
+	account := accountRepository.GetDataByIndex("_id",service.DecodeJWT(token))
+	return &AccountResolver{account}
+}
+
+
+func (r *Resolver) IsUsernameAvailable(args struct{
+	Username string
+})(bool){
+	accountRepository := repository.NewAccountRepository()
+	account := accountRepository.GetDataByIndex("username",args.Username)
+	if account == nil {
+		return true
+	} else{
+		return false
+	}
+}
+
 func (r *Resolver) UploadImage(args struct{
 	Directory string
 })(string){

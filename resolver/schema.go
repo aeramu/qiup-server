@@ -22,9 +22,10 @@ var Schema = `
 	type Account{
 		id: ID!
 		email: String!
-		profile: Profile!
 	}
 	type Profile{
+		id: ID!
+		username: String!
 		name: String!
 		bio: String!
 		profilePhoto: String!
