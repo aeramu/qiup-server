@@ -25,6 +25,8 @@ var Schema = `
 		register(email: String!, username: String!, password: String!): String!
 		editProfile(name: String!, bio: String!, profilePhoto: String!, coverPhoto: String!): Account!
 		uploadImage(directory: String!): String!
+		isEmailAvailable(email: String!): Boolean!
+		isUsernameAvailable(username: String!): Boolean!
 	}
 	type Account{
 		id: ID!
@@ -42,6 +44,30 @@ var Schema = `
 
 func (r *Resolver) Hello()(string){
 	return "Hello world!"
+}
+
+func (r *Resolver) IsEmailAvailable(args struct{
+	Email string
+})(bool){
+	accountRepository := repository.NewAccountRepository()
+	account := accountRepository.GetDataByIndex("email",args.Email)
+	if account == nil {
+		return true
+	} else{
+		return false
+	}
+}
+
+func (r *Resolver) IsUsernameAvailable(args struct{
+	Username string
+})(bool){
+	accountRepository := repository.NewAccountRepository()
+	account := accountRepository.GetDataByIndex("username",args.Username)
+	if account == nil {
+		return true
+	} else{
+		return false
+	}
 }
 
 func (r *Resolver) Login(args struct{

@@ -18,7 +18,7 @@ type AccountRepository interface{
 // Constructor for AccountRepository
 func NewAccountRepository()(AccountRepository){
 	client,_ := mongo.Connect(context.Background(), options.Client().ApplyURI(
-		"mongodb+srv://admin:admin@quip-wrbox.mongodb.net/",
+		"mongodb+srv://admin:admin@qiup-wrbox.mongodb.net/",
 	))
 	return &AccountRepositoryImplementation{
 		client: client,
@@ -31,7 +31,7 @@ type AccountRepositoryImplementation struct{
 }
 
 func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{}) (*entity.Account){
-	collection := repository.client.Database("quip").Collection("account")
+	collection := repository.client.Database("qiup").Collection("account")
 	
 	var account entity.Account
 	collection.FindOne(context.TODO(),bson.D{{indexName,indexValue}}).Decode(&account)
@@ -43,14 +43,14 @@ func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName stri
 }
 
 func (repository *AccountRepositoryImplementation) PutData(account *entity.Account)(string){
-	collection := repository.client.Database("quip").Collection("account")
+	collection := repository.client.Database("qiup").Collection("account")
 	result,_ := collection.InsertOne(context.TODO(),account)
 
 	return result.InsertedID.(string)
 }
 
 func (repository *AccountRepositoryImplementation) UpdateData(accountID string, indexName string, indexValue interface{}) (*entity.Account){
-	collection := repository.client.Database("quip").Collection("account")
+	collection := repository.client.Database("qiup").Collection("account")
 	collection.UpdateOne(context.TODO(),bson.D{{"_id",accountID}},bson.D{{"$set", bson.D{{indexName, indexValue}}}})
 
 	var account entity.Account
