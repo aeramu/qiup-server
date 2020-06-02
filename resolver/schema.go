@@ -8,7 +8,6 @@ var Schema = `
 		mutation: Mutation
   	}
   	type Query{
-		hello: String!
 		account(id: ID!): Account
 		me: Account!
 	}

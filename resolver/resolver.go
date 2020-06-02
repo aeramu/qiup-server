@@ -8,10 +8,6 @@ import(
 	"github.com/graph-gophers/graphql-go"
 )
 
-func (r *Resolver) Hello()(string){
-	return "Hello world!"
-}
-
 func (r *Resolver) IsEmailAvailable(args struct{
 	Email string
 })(bool){
