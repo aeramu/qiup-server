@@ -13,7 +13,7 @@ var Schema = `
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
-		register(email: String!, username: String!, password: String!): String!
+		register(email: String!, password: String!): String!
 		editProfile(name: String!, bio: String!, profilePhoto: String!, coverPhoto: String!): Account!
 		uploadImage(directory: String!): String!
 		isEmailAvailable(email: String!): Boolean!
@@ -22,7 +22,6 @@ var Schema = `
 	type Account{
 		id: ID!
 		email: String!
-		username: String!
 		profile: Profile!
 	}
 	type Profile{

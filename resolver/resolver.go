@@ -5,7 +5,6 @@ import(
 	"github.com/aeramu/qiup-server/entity"
 	"github.com/aeramu/qiup-server/service"
 	"github.com/aeramu/qiup-server/repository"
-	"github.com/graph-gophers/graphql-go"
 )
 
 func (r *Resolver) EditProfile(ctx context.Context, args struct{

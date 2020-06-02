@@ -39,10 +39,7 @@ func (r *Resolver) Login(args struct{
 	accountRepository := repository.NewAccountRepository()
 	account := accountRepository.GetDataByIndex("email",args.Email)
 	if account == nil {
-		account = accountRepository.GetDataByIndex("username",args.Email)
-		if account == nil{
-			return "Email or username not registered"
-		}
+		return "Email not registered"
 	}
 	if service.Hash(args.Password) != account.Password {
 		return "Wrong password"
@@ -52,20 +49,15 @@ func (r *Resolver) Login(args struct{
 
 func (r *Resolver) Register(args struct{
 	Email string
-	Username string
 	Password string
 })(string){
 	accountRepository := repository.NewAccountRepository()
 	if accountRepository.GetDataByIndex("email",args.Email) != nil {
 		return "Email already registered"
 	}
-	if accountRepository.GetDataByIndex("username",args.Username) != nil {
-		return "Username already registered"
-	}
 	account := &entity.Account{
 		ID: service.GenerateUUID(),
 		Email: args.Email,
-		Username: args.Username,
 		Password: service.Hash(args.Password),
 	}
 	accountRepository.PutData(account)
@@ -95,9 +87,6 @@ func (r *AccountResolver) ID()(graphql.ID){
 }
 func (r *AccountResolver) Email()(string){
 	return r.account.Email
-}
-func (r *AccountResolver) Username()(string){
-	return r.account.Username
 }
 func (r *AccountResolver) Profile()(*ProfileResolver){
 	return &ProfileResolver{r.account.Profile}

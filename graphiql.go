@@ -12,15 +12,14 @@ import (
 
 func main() {
     schema := graphql.MustParseSchema(resolver.Schema, &resolver.Resolver{})
-    http.Handle("/query", &relay.Handler{Schema: schema})
-    // TODO: init model
-	// TODO: graphiql
+	http.Handle("/query", &relay.Handler{Schema: schema})
+	
 	graphiqlHandler, err := graphiql.NewGraphiqlHandler("/query")
 	if err != nil {
 		panic(err)
 	}
 	http.Handle("/", graphiqlHandler)
-    // Run
+    
     log.Println("Server ready at 8080")
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
