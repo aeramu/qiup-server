@@ -32,25 +32,25 @@ func (r *ProfileResolver) CoverPhoto()(string){
 
 func (r *Resolver) Profile(args struct{
 	ID graphql.ID
-})(*AccountResolver){
-	accountRepository := repository.NewAccountRepository()
-	account := accountRepository.GetDataByIndex("_id",string(args.ID))
-	return &AccountResolver{account}
+})(*ProfileResolver){
+	profileRepository := repository.NewProfileRepository()
+	profile := profileRepository.GetDataByIndex("_id",string(args.ID))
+	return &ProfileResolver{profile}
 }
 
-func (r *Resolver) MyProfile(ctx context.Context)(*AccountResolver){
+func (r *Resolver) MyProfile(ctx context.Context)(*ProfileResolver){
 	token := ctx.Value("token").(string)
-	accountRepository := repository.NewAccountRepository()
-	account := accountRepository.GetDataByIndex("_id",service.DecodeJWT(token))
-	return &AccountResolver{account}
+	profileRepository := repository.NewProfileRepository()
+	profile := profileRepository.GetDataByIndex("_id",service.DecodeJWT(token))
+	return &ProfileResolver{profile}
 }
 
 func (r *Resolver) IsUsernameAvailable(args struct{
 	Username string
 })(bool){
-	accountRepository := repository.NewAccountRepository()
-	account := accountRepository.GetDataByIndex("username",args.Username)
-	if account == nil {
+	profileRepository := repository.NewProfileRepository()
+	profile := profileRepository.GetDataByIndex("username",args.Username)
+	if profile == nil {
 		return true
 	} else{
 		return false
@@ -62,7 +62,7 @@ func (r *Resolver) EditProfile(ctx context.Context, args struct{
 	Bio string
 	ProfilePhoto string
 	CoverPhoto string
-})(*AccountResolver){
+})(*ProfileResolver){
 	token := ctx.Value("token").(string)
 	profile := &entity.Profile{
 		Name: args.Name,
@@ -70,9 +70,9 @@ func (r *Resolver) EditProfile(ctx context.Context, args struct{
 		ProfilePhoto: args.ProfilePhoto,
 		CoverPhoto: args.CoverPhoto,
 	}
-	accountRepository := repository.NewAccountRepository()
-	account := accountRepository.UpdateData(service.DecodeJWT(token),"profile",profile)
-	return &AccountResolver{account}
+	profileRepository := repository.NewProfileRepository()
+	profile = profileRepository.UpdateData(service.DecodeJWT(token),"profile",profile)
+	return &ProfileResolver{profile}
 }
 
 func (r *Resolver) UploadImage(args struct{

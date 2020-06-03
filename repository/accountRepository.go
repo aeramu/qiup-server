@@ -11,7 +11,7 @@ import (
 // interface for account repository
 type AccountRepository interface{
 	GetDataByIndex(indexName string, indexValue interface{}) (*entity.Account)
-	PutData(account *entity.Account) (string)
+	PutData(account *entity.Account)
 	UpdateData(accountID string, indexName string, indexValue interface{}) (*entity.Account)
 }
 
@@ -42,11 +42,9 @@ func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName stri
 	return &account
 }
 
-func (repository *AccountRepositoryImplementation) PutData(account *entity.Account)(string){
+func (repository *AccountRepositoryImplementation) PutData(account *entity.Account){
 	collection := repository.client.Database("qiup").Collection("account")
-	result,_ := collection.InsertOne(context.TODO(),account)
-
-	return result.InsertedID.(string)
+	collection.InsertOne(context.TODO(),account)
 }
 
 func (repository *AccountRepositoryImplementation) UpdateData(accountID string, indexName string, indexValue interface{}) (*entity.Account){
