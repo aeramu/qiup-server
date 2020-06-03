@@ -11,8 +11,9 @@ var Schema = `
 		myAccount: Account!
 		isEmailAvailable(email: String!): Boolean!
 
-		account(id: ID!): Account
-		me: Account!
+		profile(id: ID!): Account
+		myProfile: Account!
+		isUsernameAvailable(username: String!): Boolean!
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
@@ -20,7 +21,6 @@ var Schema = `
 
 		editProfile(name: String!, bio: String!, profilePhoto: String!, coverPhoto: String!): Account!
 		uploadImage(directory: String!): String!
-		isUsernameAvailable(username: String!): Boolean!
 	}
 	type Account{
 		id: ID!
