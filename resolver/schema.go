@@ -9,17 +9,17 @@ var Schema = `
   	}
   	type Query{
 		myAccount: Account!
-		isEmailAvailable(email: String!): Boolean!
 
 		profile(id: ID!): Profile!
 		myProfile: Profile!
-		isUsernameAvailable(username: String!): Boolean!
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
 		register(email: String!, password: String!): String!
+		isEmailAvailable(email: String!): Boolean!
 
-		editProfile(name: String!, bio: String!, profilePhoto: String!, coverPhoto: String!): Profile!
+		setProfile(username: String!, name: String!, bio: String!, profilePhoto: String!, coverPhoto: String!): Profile!
+		isUsernameAvailable(username: String!): Boolean!
 		uploadImage(directory: String!): String!
 	}
 	type Account{

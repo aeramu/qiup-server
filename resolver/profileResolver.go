@@ -57,7 +57,8 @@ func (r *Resolver) IsUsernameAvailable(args struct{
 	}
 }
 
-func (r *Resolver) EditProfile(ctx context.Context, args struct{
+func (r *Resolver) SetProfile(ctx context.Context, args struct{
+	Username string
 	Name string
 	Bio string
 	ProfilePhoto string
@@ -65,13 +66,15 @@ func (r *Resolver) EditProfile(ctx context.Context, args struct{
 })(*ProfileResolver){
 	token := ctx.Value("token").(string)
 	profile := &entity.Profile{
+		ID: service.DecodeJWT(token),
+		Username: args.Username,
 		Name: args.Name,
 		Bio: args.Bio,
 		ProfilePhoto: args.ProfilePhoto,
 		CoverPhoto: args.CoverPhoto,
 	}
 	profileRepository := repository.NewProfileRepository()
-	profile = profileRepository.UpdateData(service.DecodeJWT(token),"profile",profile)
+	profileRepository.PutData(profile)
 	return &ProfileResolver{profile}
 }
 
