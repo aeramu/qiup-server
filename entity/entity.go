@@ -9,7 +9,7 @@ type Account struct{
 type ShareAccount struct{
 	ID string `bson:"_id"`
 	Username string
-	ShareProfile ShareProfile
+	ShareProfile ShareProfile `bson:"shareProfile"`
 }
 
 type ShareProfile struct{
