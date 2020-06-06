@@ -6,9 +6,13 @@ type Account struct{
 	Password string
 }
 
-type Profile struct{
+type ShareAccount struct{
 	ID string `bson:"_id"`
 	Username string
+	ShareProfile ShareProfile
+}
+
+type ShareProfile struct{
 	Name string
 	Bio string
 	ProfilePhoto string

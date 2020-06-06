@@ -10,23 +10,25 @@ var Schema = `
   	type Query{
 		myAccount: Account!
 
-		profile(id: ID!): Profile!
-		myProfile: Profile!
+		shareAccount(id: ID!): ShareAccount!
+		myShareAccount: ShareAccount!
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
 		register(email: String!, password: String!): String!
 		isEmailAvailable(email: String!): Boolean!
 
-		setProfile(username: String!, name: String!, bio: String!, profilePhoto: String!, coverPhoto: String!): Profile!
+		setShareUsername(username: String!): String!
+		setShareProfile(name: String!, bio: String!, profilePhoto: String!, coverPhoto: String!): ShareAccount!
 		isUsernameAvailable(username: String!): Boolean!
+
 		uploadImage(directory: String!): String!
 	}
 	type Account{
 		id: ID!
 		email: String!
 	}
-	type Profile{
+	type ShareAccount{
 		id: ID!
 		username: String!
 		name: String!
