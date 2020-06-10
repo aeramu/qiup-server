@@ -22,3 +22,9 @@ type ShareProfile struct{
 	ProfilePhoto string
 	CoverPhoto string
 }
+
+type SharePost struct{
+	ID primitive.ObjectID `bson:"_id"`
+	AccountID primitive.ObjectID
+	Body string
+}

@@ -22,6 +22,8 @@ var Schema = `
 		setShareProfile(name: String!, bio: String!, profilePhoto: String!, coverPhoto: String!): ShareAccount!
 		isUsernameAvailable(username: String!): Boolean!
 
+		
+
 		uploadImage(directory: String!): String!
 	}
 	type Account{
@@ -35,5 +37,11 @@ var Schema = `
 		bio: String!
 		profilePhoto: String!
 		coverPhoto: String!
+	}
+	type SharePost{
+		id: ID!
+		timestamp: Int!
+		account: ShareAccount!
+		body: String!
 	}
 `
