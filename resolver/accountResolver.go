@@ -47,9 +47,8 @@ func (r *Resolver) Register(args struct{
 	if accountRepository.GetDataByIndex("email",args.Email) != nil {
 		return "Email already registered"
 	}
-	id := primitive.NewObjectID()
 	account := &entity.Account{
-		ID: id,
+		ID: primitive.NewObjectID(),
 		Email: args.Email,
 		Password: service.Hash(args.Password),
 	}

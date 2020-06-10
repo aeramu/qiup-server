@@ -22,7 +22,7 @@ var Schema = `
 		setShareProfile(name: String!, bio: String!, profilePhoto: String!, coverPhoto: String!): ShareAccount!
 		isUsernameAvailable(username: String!): Boolean!
 
-		
+		postSharePost(body: String!): SharePost!
 
 		uploadImage(directory: String!): String!
 	}

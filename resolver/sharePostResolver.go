@@ -1,9 +1,11 @@
 package resolver
 
 import(
+	"context"
 	"github.com/aeramu/qiup-server/entity"
 	"github.com/aeramu/qiup-server/repository"
 	"github.com/graph-gophers/graphql-go"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type SharePostResolver struct{
@@ -22,4 +24,19 @@ func (r *SharePostResolver) AccountID()(*ShareAccountResolver){
 }
 func (r *SharePostResolver) Body()(string){
 	return r.post.Body
+}
+
+func (r *Resolver) postSharePost(ctx context.Context, args struct{
+	Body string
+})(*SharePostResolver){
+	token := ctx.Value("token").(string)
+	accountID,_ := primitive.ObjectIDFromHex(service.DecodeJWT(token))
+	post := &entity.SharePost{
+		ID: primitive.NewObjectID(),
+		AccountID: accountID,
+		Body: args.Body,
+	}
+	sharePostRepository := repository.NewSharePostRepository()
+	sharePostRepository.PutData(post)
+	return &SharePostResolver{post}
 }
