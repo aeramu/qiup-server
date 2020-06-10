@@ -12,6 +12,8 @@ var Schema = `
 
 		shareAccount(id: ID!): ShareAccount!
 		myShareAccount: ShareAccount!
+
+		sharePost(id: ID!): SharePost!
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!

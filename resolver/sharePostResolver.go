@@ -27,6 +27,15 @@ func (r *SharePostResolver) Body()(string){
 	return r.post.Body
 }
 
+func (r *Resolver) SharePost(args struct{
+	ID graphql.ID
+})(*SharePostResolver){
+	sharePostRepository := repository.NewSharePostRepository()
+	id,_ := primitive.ObjectIDFromHex(string(args.ID))
+	post := sharePostRepository.GetDataByIndex("_id",id)
+	return &SharePostResolver{post}
+}
+
 func (r *Resolver) PostSharePost(ctx context.Context, args struct{
 	Body string
 })(*SharePostResolver){
