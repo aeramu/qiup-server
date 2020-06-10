@@ -4,6 +4,7 @@ import(
 	"context"
 	"github.com/aeramu/qiup-server/entity"
 	"github.com/aeramu/qiup-server/repository"
+	"github.com/aeramu/qiup-server/service"
 	"github.com/graph-gophers/graphql-go"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -14,10 +15,10 @@ type SharePostResolver struct{
 func (r *SharePostResolver) ID()(graphql.ID){
 	return graphql.ID(r.post.ID.Hex())
 }
-func (r *SharePostResolver) Timestamp()(int64){
-	return r.post.ID.Timestamp().Unix()
+func (r *SharePostResolver) Timestamp()(int32){
+	return int32(r.post.ID.Timestamp().Unix())
 }
-func (r *SharePostResolver) AccountID()(*ShareAccountResolver){
+func (r *SharePostResolver) Account()(*ShareAccountResolver){
 	shareAccountRepository := repository.NewShareAccountRepository()
 	account := shareAccountRepository.GetDataByIndex("_id",r.post.AccountID)
 	return &ShareAccountResolver{account}
@@ -26,7 +27,7 @@ func (r *SharePostResolver) Body()(string){
 	return r.post.Body
 }
 
-func (r *Resolver) postSharePost(ctx context.Context, args struct{
+func (r *Resolver) PostSharePost(ctx context.Context, args struct{
 	Body string
 })(*SharePostResolver){
 	token := ctx.Value("token").(string)
