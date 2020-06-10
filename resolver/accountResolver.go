@@ -13,7 +13,7 @@ type AccountResolver struct{
 	account *entity.Account
 }
 func (r *AccountResolver) ID()(graphql.ID){
-	return graphql.ID(r.account.ID.String())
+	return graphql.ID(r.account.ID.Hex())
 }
 func (r *AccountResolver) Email()(string){
 	return r.account.Email
@@ -47,12 +47,14 @@ func (r *Resolver) Register(args struct{
 	if accountRepository.GetDataByIndex("email",args.Email) != nil {
 		return "Email already registered"
 	}
+	id := primitive.NewObjectID()
 	account := &entity.Account{
+		ID: id,
 		Email: args.Email,
 		Password: service.Hash(args.Password),
 	}
 	accountRepository.PutData(account)
-	return service.GenerateJWT(account.ID.String())
+	return service.GenerateJWT(account.ID.Hex())
 }
 
 func (r *Resolver) Login(args struct{
@@ -67,5 +69,5 @@ func (r *Resolver) Login(args struct{
 	if service.Hash(args.Password) != account.Password {
 		return "Wrong password"
 	}
-	return service.GenerateJWT(account.ID.String())
+	return service.GenerateJWT(account.ID.Hex())
 }

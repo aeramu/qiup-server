@@ -13,7 +13,7 @@ type ShareAccountResolver struct{
 	account *entity.ShareAccount
 }
 func (r *ShareAccountResolver) ID()(graphql.ID){
-	return graphql.ID(r.account.ID.String())
+	return graphql.ID(r.account.ID.Hex())
 }
 func (r *ShareAccountResolver) Username()(string){
 	return r.account.Username
