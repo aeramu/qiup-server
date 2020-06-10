@@ -6,13 +6,14 @@ import(
 	"github.com/aeramu/qiup-server/service"
 	"github.com/aeramu/qiup-server/repository"
 	"github.com/graph-gophers/graphql-go"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AccountResolver struct{
 	account *entity.Account
 }
 func (r *AccountResolver) ID()(graphql.ID){
-	return graphql.ID(r.account.ID)
+	return graphql.ID(r.account.ID.String())
 }
 func (r *AccountResolver) Email()(string){
 	return r.account.Email
@@ -21,7 +22,8 @@ func (r *AccountResolver) Email()(string){
 func (r *Resolver) MyAccount(ctx context.Context)(*AccountResolver){
 	token := ctx.Value("token").(string)
 	accountRepository := repository.NewAccountRepository()
-	account := accountRepository.GetDataByIndex("_id",service.DecodeJWT(token))
+	id,_ := primitive.ObjectIDFromHex(service.DecodeJWT(token))
+	account := accountRepository.GetDataByIndex("_id",id)
 	return &AccountResolver{account}
 }
 
@@ -46,12 +48,11 @@ func (r *Resolver) Register(args struct{
 		return "Email already registered"
 	}
 	account := &entity.Account{
-		ID: service.GenerateUUID(),
 		Email: args.Email,
 		Password: service.Hash(args.Password),
 	}
 	accountRepository.PutData(account)
-	return service.GenerateJWT(account.ID)
+	return service.GenerateJWT(account.ID.String())
 }
 
 func (r *Resolver) Login(args struct{
@@ -66,5 +67,5 @@ func (r *Resolver) Login(args struct{
 	if service.Hash(args.Password) != account.Password {
 		return "Wrong password"
 	}
-	return service.GenerateJWT(account.ID)
+	return service.GenerateJWT(account.ID.String())
 }

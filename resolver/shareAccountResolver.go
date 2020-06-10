@@ -6,13 +6,14 @@ import(
 	"github.com/aeramu/qiup-server/service"
 	"github.com/aeramu/qiup-server/repository"
 	"github.com/graph-gophers/graphql-go"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ShareAccountResolver struct{
 	account *entity.ShareAccount
 }
 func (r *ShareAccountResolver) ID()(graphql.ID){
-	return graphql.ID(r.account.ID)
+	return graphql.ID(r.account.ID.String())
 }
 func (r *ShareAccountResolver) Username()(string){
 	return r.account.Username
@@ -34,14 +35,16 @@ func (r *Resolver) ShareAccount(args struct{
 	ID graphql.ID
 })(*ShareAccountResolver){
 	shareAccountRepository := repository.NewShareAccountRepository()
-	account := shareAccountRepository.GetDataByIndex("_id",string(args.ID))
+	id,_ := primitive.ObjectIDFromHex(string(args.ID))
+	account := shareAccountRepository.GetDataByIndex("_id",id)
 	return &ShareAccountResolver{account}
 }
 
 func (r *Resolver) MyShareAccount(ctx context.Context)(*ShareAccountResolver){
 	token := ctx.Value("token").(string)
 	shareAccountRepository := repository.NewShareAccountRepository()
-	account := shareAccountRepository.GetDataByIndex("_id",service.DecodeJWT(token))
+	id,_ := primitive.ObjectIDFromHex(service.DecodeJWT(token))
+	account := shareAccountRepository.GetDataByIndex("_id",id)
 	return &ShareAccountResolver{account}
 }
 
@@ -65,8 +68,9 @@ func (r *Resolver) SetShareUsername(ctx context.Context, args struct{
 	if shareAccountRepository.GetDataByIndex("username",args.Username) != nil {
 		return "Username already taken"
 	}
+	id,_ := primitive.ObjectIDFromHex(service.DecodeJWT(token))
 	account := &entity.ShareAccount{
-		ID: service.DecodeJWT(token),
+		ID: id,
 		Username: args.Username,
 	}
 	shareAccountRepository.PutData(account)
@@ -87,7 +91,8 @@ func (r *Resolver) SetShareProfile(ctx context.Context, args struct{
 		CoverPhoto: args.CoverPhoto,
 	}
 	shareAccountRepository := repository.NewShareAccountRepository()
-	account := shareAccountRepository.UpdateData(service.DecodeJWT(token),"shareProfile", profile)
+	id,_ := primitive.ObjectIDFromHex(service.DecodeJWT(token))
+	account := shareAccountRepository.UpdateData(id,"shareProfile", profile)
 	return &ShareAccountResolver{account}
 }
 

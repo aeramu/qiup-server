@@ -6,12 +6,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ShareAccountRepository interface{
 	GetDataByIndex(indexName string, indexValue interface{}) (*entity.ShareAccount)
 	PutData(account *entity.ShareAccount)
-	UpdateData(accountID string, indexName string, indexValue interface{}) (*entity.ShareAccount)
+	UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) (*entity.ShareAccount)
 }
 
 func NewShareAccountRepository()(ShareAccountRepository){
@@ -33,7 +34,7 @@ func (repository *ShareAccountRepositoryImplementation) GetDataByIndex(indexName
 	var account entity.ShareAccount
 	collection.FindOne(context.TODO(),bson.D{{indexName,indexValue}}).Decode(&account)
 
-	if account.ID == "" {
+	if account.ID.IsZero() {
 		return nil
 	}
 	return &account
@@ -44,7 +45,7 @@ func (repository *ShareAccountRepositoryImplementation) PutData(account *entity.
 	collection.InsertOne(context.TODO(),account)
 }
 
-func (repository *ShareAccountRepositoryImplementation) UpdateData(accountID string, indexName string, indexValue interface{}) (*entity.ShareAccount){
+func (repository *ShareAccountRepositoryImplementation) UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) (*entity.ShareAccount){
 	collection := repository.client.Database("qiup").Collection("shareAccount")
 	collection.UpdateOne(context.TODO(),bson.D{{"_id",accountID}},bson.D{{"$set", bson.D{{indexName, indexValue}}}})
 
