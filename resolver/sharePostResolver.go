@@ -36,6 +36,16 @@ func (r *Resolver) SharePost(args struct{
 	return &SharePostResolver{post}
 }
 
+func (r *Resolver) SharePostList()([]*SharePostResolver){
+	sharePostRepository := repository.NewSharePostRepository()
+	postList := sharePostRepository.GetDataList()
+	var sharePostList []*SharePostResolver
+	for _,post := range(postList) {
+		sharePostList = append(sharePostList,&SharePostResolver{post})
+	}
+	return sharePostList
+}
+
 func (r *Resolver) PostSharePost(ctx context.Context, args struct{
 	Body string
 })(*SharePostResolver){
