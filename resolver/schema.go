@@ -27,6 +27,8 @@ var Schema = `
 
 		postSharePost(body: String!): SharePost!
 
+		postJustPost(name: String!, body: String!, parentID: ID = ""): JustPost!
+
 		uploadImage(directory: String!): String!
 	}
 	type Account{

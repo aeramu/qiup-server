@@ -5,7 +5,7 @@ import(
 	"github.com/aeramu/qiup-server/entity"
 	"github.com/aeramu/qiup-server/repository"
 	"github.com/graph-gophers/graphql-go"
-	//"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type JustPostResolver struct{
@@ -36,4 +36,30 @@ func (r *JustPostResolver) Child()([]*JustPostResolver){
 		justPostList = append(justPostList,&JustPostResolver{post})
 	}
 	return justPostList
+}
+
+func (r *Resolver) PostJustPost(args struct{
+	Name string
+	Body string
+	ParentID graphql.ID
+})(*JustPostResolver){
+	var post *entity.JustPost
+	if (string(args.ParentID) == ""){
+		post = &entity.JustPost{
+			ID: primitive.NewObjectID(),
+			Name: args.Name,
+			Body: args.Body,
+		}
+	} else{
+		parentID,_ := primitive.ObjectIDFromHex(string(args.ParentID))
+		post = &entity.JustPost{
+			ID: primitive.NewObjectID(),
+			ParentID: parentID,
+			Name: args.Name,
+			Body: args.Body,
+		}
+	}
+	justPostRepository := repository.NewJustPostRepository()
+	justPostRepository.PutData(post)
+	return &JustPostResolver{post}
 }
