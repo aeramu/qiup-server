@@ -19,7 +19,7 @@ func (r *JustPostResolver) Timestamp()(int32){
 }
 func (r *JustPostResolver) Parent()(*JustPostResolver){
 	justPostRepository := repository.NewJustPostRepository()
-	post := justPostRepository.GetDataByIndex("_id",r.post.ParentID.Hex())
+	post := justPostRepository.GetDataByIndex("_id",r.post.ParentID)
 	return &JustPostResolver{post}
 }
 func (r *JustPostResolver) Name()(string){
@@ -30,7 +30,7 @@ func (r *JustPostResolver) Body()(string){
 }
 func (r *JustPostResolver) Child()([]*JustPostResolver){
 	justPostRepository := repository.NewJustPostRepository()
-	postList := justPostRepository.GetDataListByIndex("parentID",r.post.ParentID.Hex())
+	postList := justPostRepository.GetDataListByIndex("parentID",r.post.ID)
 	var justPostList []*JustPostResolver
 	for _,post := range(postList) {
 		justPostList = append(justPostList,&JustPostResolver{post})

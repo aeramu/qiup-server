@@ -31,7 +31,7 @@ type SharePost struct{
 
 type JustPost struct{
 	ID primitive.ObjectID `bson:"_id"`
-	ParentID primitive.ObjectID
+	ParentID primitive.ObjectID `bson:"parentID"`
 	Name string
 	Body string
 }
