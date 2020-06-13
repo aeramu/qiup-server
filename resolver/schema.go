@@ -47,4 +47,12 @@ var Schema = `
 		account: ShareAccount!
 		body: String!
 	}
+	type JustPost{
+		id: ID!
+		timestamp: Int!
+		parent: JustPost!
+		name: String!
+		body: String!
+		child: [JustPost]!
+	}
 `

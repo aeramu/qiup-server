@@ -28,3 +28,10 @@ type SharePost struct{
 	AccountID primitive.ObjectID
 	Body string
 }
+
+type JustPost struct{
+	ID primitive.ObjectID `bson:"_id"`
+	ParentID primitive.ObjectID
+	Name string
+	Body string
+}
