@@ -6,11 +6,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson"
-	//"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type JustPostRepository interface{
 	GetDataByIndex(indexName string, indexValue interface{}) (*entity.JustPost)
+	GetDataList(limit int32, after primitive.ObjectID) ([]*entity.JustPost)
 	GetDataListByIndex(indexName string, indexValue interface{}, limit int32) ([]*entity.JustPost)
 	PutData(account *entity.JustPost)
 	//UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) (*entity.ShareAccount)
@@ -46,6 +47,16 @@ func (repository *JustPostRepositoryImplementation) GetDataListByIndex(indexName
 
 	var postList []*entity.JustPost
 	cursor,_ := collection.Find(context.TODO(),bson.D{{indexName,indexValue}},options.Find().SetLimit(int64(limit)))
+	cursor.All(context.TODO(),&postList)
+
+	return postList
+}
+
+func (repository *JustPostRepositoryImplementation) GetDataList(limit int32, after primitive.ObjectID) ([]*entity.JustPost){
+	collection := repository.client.Database("qiup").Collection("justPost")
+
+	var postList []*entity.JustPost
+	cursor,_ := collection.Find(context.TODO(),bson.D{{"_id",bson.D{{"$gt",after}}}},options.Find().SetLimit(int64(limit)))
 	cursor.All(context.TODO(),&postList)
 
 	return postList

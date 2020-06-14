@@ -49,6 +49,20 @@ func (r *Resolver) JustPost(args struct{
 	return &JustPostResolver{post}
 }
 
+func (r *Resolver) JustPostList(args struct{
+	First int32
+	After graphql.ID
+})([]*JustPostResolver){
+	justPostRepository := repository.NewJustPostRepository()
+	id,_ := primitive.ObjectIDFromHex(string(args.After))
+	postList := justPostRepository.GetDataList(args.First,id)
+	var justPostList []*JustPostResolver
+	for _,post := range(postList) {
+		justPostList = append(justPostList,&JustPostResolver{post})
+	}
+	return justPostList
+}
+
 func (r *Resolver) PostJustPost(args struct{
 	Name string
 	Body string
