@@ -15,6 +15,8 @@ var Schema = `
 
 		sharePost(id: ID!): SharePost!
 		sharePostList: [SharePost]!
+
+		justPost(id: ID!): JustPost!
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
@@ -55,6 +57,6 @@ var Schema = `
 		parent: JustPost!
 		name: String!
 		body: String!
-		child: [JustPost]!
+		child(first: Int!): [JustPost]!
 	}
 `

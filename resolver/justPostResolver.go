@@ -28,14 +28,25 @@ func (r *JustPostResolver) Name()(string){
 func (r *JustPostResolver) Body()(string){
 	return r.post.Body
 }
-func (r *JustPostResolver) Child()([]*JustPostResolver){
+func (r *JustPostResolver) Child(args struct{
+	First int32
+})([]*JustPostResolver){
 	justPostRepository := repository.NewJustPostRepository()
-	postList := justPostRepository.GetDataListByIndex("parentID",r.post.ID)
+	postList := justPostRepository.GetDataListByIndex("parentID",r.post.ID,args.First)
 	var justPostList []*JustPostResolver
 	for _,post := range(postList) {
 		justPostList = append(justPostList,&JustPostResolver{post})
 	}
 	return justPostList
+}
+
+func (r *Resolver) JustPost(args struct{
+	ID graphql.ID
+})(*JustPostResolver){
+	justPostRepository := repository.NewJustPostRepository()
+	id,_ := primitive.ObjectIDFromHex(string(args.ID))
+	post := justPostRepository.GetDataByIndex("_id",id)
+	return &JustPostResolver{post}
 }
 
 func (r *Resolver) PostJustPost(args struct{

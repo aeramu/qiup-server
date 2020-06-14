@@ -11,7 +11,7 @@ import (
 
 type JustPostRepository interface{
 	GetDataByIndex(indexName string, indexValue interface{}) (*entity.JustPost)
-	GetDataListByIndex(indexName string, indexValue interface{}) ([]*entity.JustPost)
+	GetDataListByIndex(indexName string, indexValue interface{}, limit int32) ([]*entity.JustPost)
 	PutData(account *entity.JustPost)
 	//UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) (*entity.ShareAccount)
 }
@@ -41,11 +41,11 @@ func (repository *JustPostRepositoryImplementation) GetDataByIndex(indexName str
 	return &post
 }
 
-func (repository *JustPostRepositoryImplementation) GetDataListByIndex(indexName string, indexValue interface{}) ([]*entity.JustPost){
+func (repository *JustPostRepositoryImplementation) GetDataListByIndex(indexName string, indexValue interface{}, limit int32) ([]*entity.JustPost){
 	collection := repository.client.Database("qiup").Collection("justPost")
 
 	var postList []*entity.JustPost
-	cursor,_ := collection.Find(context.TODO(),bson.D{{indexName,indexValue}})
+	cursor,_ := collection.Find(context.TODO(),bson.D{{indexName,indexValue}},options.Find().SetLimit(int64(limit)))
 	cursor.All(context.TODO(),&postList)
 
 	return postList
