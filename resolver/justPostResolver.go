@@ -19,7 +19,7 @@ func (r *JustPostResolver) Timestamp()(int32){
 }
 func (r *JustPostResolver) Parent()(*JustPostResolver){
 	justPostRepository := repository.NewJustPostRepository()
-	post := justPostRepository.GetDataByIndex("_id",r.post.ParentID)
+	post := justPostRepository.GetDataByIndex("_id", r.post.ParentID)
 	return &JustPostResolver{post}
 }
 func (r *JustPostResolver) Name()(string){
@@ -30,12 +30,14 @@ func (r *JustPostResolver) Body()(string){
 }
 func (r *JustPostResolver) Child(args struct{
 	First int32
+	After graphql.ID
 })([]*JustPostResolver){
 	justPostRepository := repository.NewJustPostRepository()
-	postList := justPostRepository.GetDataListByIndex("parentID",r.post.ID,args.First)
+	id,_ := primitive.ObjectIDFromHex(string(args.After))
+	postList := justPostRepository.GetDataListByIndex("parentID", r.post.ID, args.First, id)
 	var justPostList []*JustPostResolver
 	for _,post := range(postList) {
-		justPostList = append(justPostList,&JustPostResolver{post})
+		justPostList = append(justPostList, &JustPostResolver{post})
 	}
 	return justPostList
 }
@@ -45,7 +47,7 @@ func (r *Resolver) JustPost(args struct{
 })(*JustPostResolver){
 	justPostRepository := repository.NewJustPostRepository()
 	id,_ := primitive.ObjectIDFromHex(string(args.ID))
-	post := justPostRepository.GetDataByIndex("_id",id)
+	post := justPostRepository.GetDataByIndex("_id", id)
 	return &JustPostResolver{post}
 }
 
@@ -55,10 +57,10 @@ func (r *Resolver) JustPostList(args struct{
 })([]*JustPostResolver){
 	justPostRepository := repository.NewJustPostRepository()
 	id,_ := primitive.ObjectIDFromHex(string(args.After))
-	postList := justPostRepository.GetDataList(args.First,id)
+	postList := justPostRepository.GetDataList(args.First, id)
 	var justPostList []*JustPostResolver
 	for _,post := range(postList) {
-		justPostList = append(justPostList,&JustPostResolver{post})
+		justPostList = append(justPostList, &JustPostResolver{post})
 	}
 	return justPostList
 }
@@ -69,20 +71,12 @@ func (r *Resolver) PostJustPost(args struct{
 	ParentID graphql.ID
 })(*JustPostResolver){
 	var post *entity.JustPost
-	if (string(args.ParentID) == ""){
-		post = &entity.JustPost{
-			ID: primitive.NewObjectID(),
-			Name: args.Name,
-			Body: args.Body,
-		}
-	} else{
-		parentID,_ := primitive.ObjectIDFromHex(string(args.ParentID))
-		post = &entity.JustPost{
-			ID: primitive.NewObjectID(),
-			ParentID: parentID,
-			Name: args.Name,
-			Body: args.Body,
-		}
+	parentID,_ := primitive.ObjectIDFromHex(string(args.ParentID))
+	post = &entity.JustPost{
+		ID: primitive.NewObjectID(),
+		ParentID: parentID,
+		Name: args.Name,
+		Body: args.Body,
 	}
 	justPostRepository := repository.NewJustPostRepository()
 	justPostRepository.PutData(post)

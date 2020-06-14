@@ -17,7 +17,7 @@ var Schema = `
 		sharePostList: [SharePost]!
 
 		justPost(id: ID!): JustPost!
-		justPostList(first: Int!, after: ID!): [JustPost]!
+		justPostList(first: Int=10, after: ID=""): [JustPost]!
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
@@ -30,7 +30,7 @@ var Schema = `
 
 		postSharePost(body: String!): SharePost!
 
-		postJustPost(name: String!, body: String!, parentID: ID = ""): JustPost!
+		postJustPost(name: String!, body: String!, parentID: ID=""): JustPost!
 
 		uploadImage(directory: String!): String!
 	}
@@ -58,6 +58,6 @@ var Schema = `
 		parent: JustPost!
 		name: String!
 		body: String!
-		child(first: Int!): [JustPost]!
+		child(first: Int=10, after: ID=""): [JustPost]!
 	}
 `
