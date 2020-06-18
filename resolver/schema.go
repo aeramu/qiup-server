@@ -55,7 +55,7 @@ var Schema = `
 	type JustPost{
 		id: ID!
 		timestamp: Int!
-		parent: JustPost!
+		parent: JustPost
 		name: String!
 		body: String!
 		child(first: Int=10, after: ID=""): [JustPost]!

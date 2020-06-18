@@ -64,7 +64,7 @@ func (repository *JustPostRepositoryImplementation) GetDataListByIndex(indexName
 func (repository *JustPostRepositoryImplementation) GetDataList(limit int32,after primitive.ObjectID)([]*entity.JustPost){
 	collection := repository.client.Database("qiup").Collection("justPost")
 
-	filter := bson.D{{"_id",bson.D{{"$gt",after}}}}
+	filter := bson.D{{"_id",bson.D{{"$lt",after}}}}
 
 	option := options.Find()
 	option.SetLimit(int64(limit))

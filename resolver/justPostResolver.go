@@ -20,6 +20,9 @@ func (r *JustPostResolver) Timestamp()(int32){
 func (r *JustPostResolver) Parent()(*JustPostResolver){
 	justPostRepository := repository.NewJustPostRepository()
 	post := justPostRepository.GetDataByIndex("_id", r.post.ParentID)
+	if (post == nil) {
+		return nil
+	}
 	return &JustPostResolver{post}
 }
 func (r *JustPostResolver) Name()(string){
