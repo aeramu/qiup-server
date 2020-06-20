@@ -33,6 +33,9 @@ func (r *JustPostResolver) Avatar()(string){
 func (r *JustPostResolver) Body()(string){
 	return r.post.Body
 }
+func (r *JustPostResolver) ReplyCount()(int32){
+	return r.post.ReplyCount
+}
 func (r *JustPostResolver) Child(args struct{
 	First int32
 	After graphql.ID
@@ -85,6 +88,7 @@ func (r *Resolver) PostJustPost(args struct{
 		Name: args.Name,
 		Avatar: args.Avatar,
 		Body: args.Body,
+		ReplyCount: 0,
 	}
 	justPostRepository := repository.NewJustPostRepository()
 	justPostRepository.PutData(post)

@@ -42,4 +42,5 @@ type JustPost struct{
 	Name string
 	Avatar string
 	Body string
+	ReplyCount int32 `bson:"replyCount"`
 }

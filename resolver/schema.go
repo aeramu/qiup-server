@@ -60,6 +60,7 @@ var Schema = `
 		avatar: String!
 		body: String!
 		child(first: Int=10, after: ID=""): JustPostConnection!
+		replyCount: Int!
 	}
 	type JustPostConnection{
 		edges: [JustPost]!

@@ -23,21 +23,23 @@ func NewJustPostRepository()(JustPostRepository){
 	))
 	return &JustPostRepositoryImplementation{
 		client: client,
+		database: client.Database("qiup"),
+		collection: client.Database("qiup").Collection("justPost"),
 	}
 }
 
 type JustPostRepositoryImplementation struct{
 	client *mongo.Client
+	database *mongo.Database
+	collection *mongo.Collection
 }
 
 func (repository *JustPostRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{})(*entity.JustPost){
-	collection := repository.client.Database("qiup").Collection("justPost")
-
-	filter := bson.D{{indexName,indexValue}}
-	
+	filter := bson.D{
+		{indexName,indexValue},
+	}
 	var post entity.JustPost
-	collection.FindOne(context.TODO(), filter).Decode(&post)
-
+	repository.collection.FindOne(context.TODO(), filter).Decode(&post)
 	if post.ID.IsZero() {
 		return nil
 	}
@@ -45,40 +47,56 @@ func (repository *JustPostRepositoryImplementation) GetDataByIndex(indexName str
 }
 
 func (repository *JustPostRepositoryImplementation) GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID)([]*entity.JustPost){
-	collection := repository.client.Database("qiup").Collection("justPost")
-
-	afterFilter := bson.D{{"_id",bson.D{{"$gt",after}}}}
-	indexFilter := bson.D{{indexName,indexValue}}
-	filter := bson.D{{"$and",bson.A{indexFilter,afterFilter}}}
-
+	filter := bson.D{
+		{"$and", bson.A{
+			bson.D{
+				{indexName, indexValue},
+			},
+			bson.D{
+				{"_id", bson.D{
+					{"$gt", after},
+				}},
+			},
+		}},
+	}
 	option := options.Find().SetLimit(int64(limit))
-
-	cursor,_ := collection.Find(context.TODO(), filter, option)
+	cursor,_ := repository.collection.Find(context.TODO(), filter, option)
 
 	var postList []*entity.JustPost
 	cursor.All(context.TODO(), &postList)
-
 	return postList
 }
 
 func (repository *JustPostRepositoryImplementation) GetDataList(limit int32,after primitive.ObjectID)([]*entity.JustPost){
-	collection := repository.client.Database("qiup").Collection("justPost")
-
-	filter := bson.D{{"_id",bson.D{{"$lt",after}}}}
-
-	option := options.Find()
-	option.SetLimit(int64(limit))
-	option.SetSort(bson.D{{"_id",-1}})
-
-	cursor,_ := collection.Find(context.TODO(), filter, option)
+	filter := bson.D{
+		{"_id",bson.D{
+			{"$lt",after},
+		}},
+	}
+	sort:= bson.D{
+		{"_id",-1},
+	}
+	option := options.Find().SetLimit(int64(limit)).SetSort(sort)
+	cursor,_ := repository.collection.Find(context.TODO(), filter, option)
 	
 	var postList []*entity.JustPost
 	cursor.All(context.TODO(), &postList)
-
 	return postList
 }
 
 func (repository *JustPostRepositoryImplementation) PutData(post *entity.JustPost){
-	collection := repository.client.Database("qiup").Collection("justPost")
-	collection.InsertOne(context.TODO(),post)
+	filter := bson.D{
+		{"_id", post.ParentID},
+	}
+	update := bson.D{
+		{"$inc",bson.D{
+			{"replyCount",1},
+		}},
+	}
+	option := options.BulkWrite().SetOrdered(false)
+	models := []mongo.WriteModel{
+		mongo.NewInsertOneModel().SetDocument(post),
+		mongo.NewUpdateOneModel().SetFilter(filter).SetUpdate(update).SetUpsert(true),
+	}
+	repository.collection.BulkWrite(context.TODO(), models, option)
 }
