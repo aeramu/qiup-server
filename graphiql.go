@@ -20,6 +20,6 @@ func main() {
 	}
 	http.Handle("/", graphiqlHandler)
     
-    log.Println("Server ready at 8080")
-    log.Fatal(http.ListenAndServe(":8080", nil))
+    log.Println("Server ready at 8000")
+    log.Fatal(http.ListenAndServe(":8000", nil))
 }

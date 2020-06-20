@@ -1,11 +1,9 @@
 package resolver
 
 import(
-	//"context"
 	"github.com/aeramu/qiup-server/entity"
 	"github.com/aeramu/qiup-server/repository"
 	"github.com/graph-gophers/graphql-go"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type JustPostResolver struct{
@@ -22,11 +20,15 @@ func (r *JustPostResolver) Parent()(*JustPostResolver){
 	post := justPostRepository.GetDataByIndex("_id", r.post.ParentID)
 	if (post == nil) {
 		return nil
+	} else {
+		return &JustPostResolver{post}
 	}
-	return &JustPostResolver{post}
 }
 func (r *JustPostResolver) Name()(string){
 	return r.post.Name
+}
+func (r *JustPostResolver) Avatar()(string){
+	return r.post.Avatar
 }
 func (r *JustPostResolver) Body()(string){
 	return r.post.Body
@@ -34,51 +36,54 @@ func (r *JustPostResolver) Body()(string){
 func (r *JustPostResolver) Child(args struct{
 	First int32
 	After graphql.ID
-})([]*JustPostResolver){
+})(*JustPostConnectionResolver){
 	justPostRepository := repository.NewJustPostRepository()
-	id,_ := primitive.ObjectIDFromHex(string(args.After))
-	postList := justPostRepository.GetDataListByIndex("parentID", r.post.ID, args.First, id)
-	var justPostList []*JustPostResolver
-	for _,post := range(postList) {
-		justPostList = append(justPostList, &JustPostResolver{post})
+	justPostList := justPostRepository.GetDataListByIndex("parentID", r.post.ID, args.First, entity.ID(string(args.After)))
+	return &JustPostConnectionResolver{justPostList}
+}
+
+type JustPostConnectionResolver struct{
+	justPostList []*entity.JustPost
+}
+func (r *JustPostConnectionResolver) Edges()([]*JustPostResolver){
+	var justPostResolverList []*JustPostResolver
+	for _,post := range(r.justPostList) {
+		justPostResolverList = append(justPostResolverList, &JustPostResolver{post})
 	}
-	return justPostList
+	return justPostResolverList
+}
+func (r *JustPostConnectionResolver) PageInfo()(*PageInfoResolver){
+	return &PageInfoResolver{r.justPostList}
 }
 
 func (r *Resolver) JustPost(args struct{
 	ID graphql.ID
 })(*JustPostResolver){
 	justPostRepository := repository.NewJustPostRepository()
-	id,_ := primitive.ObjectIDFromHex(string(args.ID))
-	post := justPostRepository.GetDataByIndex("_id", id)
+	post := justPostRepository.GetDataByIndex("_id", entity.ID(string(args.ID)))
 	return &JustPostResolver{post}
 }
 
 func (r *Resolver) JustPostList(args struct{
 	First int32
 	After graphql.ID
-})([]*JustPostResolver){
+})(*JustPostConnectionResolver){
 	justPostRepository := repository.NewJustPostRepository()
-	id,_ := primitive.ObjectIDFromHex(string(args.After))
-	postList := justPostRepository.GetDataList(args.First, id)
-	var justPostList []*JustPostResolver
-	for _,post := range(postList) {
-		justPostList = append(justPostList, &JustPostResolver{post})
-	}
-	return justPostList
+	justPostList := justPostRepository.GetDataList(args.First, entity.ID(string(args.After)))
+	return &JustPostConnectionResolver{justPostList}
 }
 
 func (r *Resolver) PostJustPost(args struct{
 	Name string
+	Avatar string
 	Body string
 	ParentID graphql.ID
 })(*JustPostResolver){
-	var post *entity.JustPost
-	parentID,_ := primitive.ObjectIDFromHex(string(args.ParentID))
-	post = &entity.JustPost{
-		ID: primitive.NewObjectID(),
-		ParentID: parentID,
+	post := &entity.JustPost{
+		ID: entity.NewID(),
+		ParentID: entity.ID(string(args.ParentID)),
 		Name: args.Name,
+		Avatar: args.Avatar,
 		Body: args.Body,
 	}
 	justPostRepository := repository.NewJustPostRepository()
