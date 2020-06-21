@@ -8,11 +8,17 @@ import(
 type PageInfoResolver struct{
 	justPostList []*entity.JustPost
 }
-func (r *PageInfoResolver) StartCursor()(graphql.ID){
-	startCursor := r.justPostList[0].ID.Hex()
-	return graphql.ID(startCursor)
+func (r *PageInfoResolver) StartCursor()(*graphql.ID){
+	if (len(r.justPostList)==0){
+		return nil
+	}
+	startCursor := graphql.ID(r.justPostList[0].ID.Hex())
+	return &startCursor
 }
-func (r *PageInfoResolver) EndCursor()(graphql.ID){
-	endCursor := r.justPostList[len(r.justPostList)-1].ID.Hex()
-	return graphql.ID(endCursor)
+func (r *PageInfoResolver) EndCursor()(*graphql.ID){
+	if (len(r.justPostList)==0){
+		return nil
+	}
+	endCursor := graphql.ID(r.justPostList[len(r.justPostList)-1].ID.Hex())
+	return &endCursor
 }

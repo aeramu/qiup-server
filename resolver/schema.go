@@ -67,7 +67,7 @@ var Schema = `
 		pageInfo: PageInfo!
 	}
 	type PageInfo{
-		startCursor: ID!
-		endCursor: ID!
+		startCursor: ID
+		endCursor: ID
 	}
 `

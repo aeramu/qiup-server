@@ -72,7 +72,7 @@ func (r *Resolver) JustPostList(args struct{
 	After graphql.ID
 })(*JustPostConnectionResolver){
 	justPostRepository := repository.NewJustPostRepository()
-	justPostList := justPostRepository.GetDataList(args.First, entity.ID(string(args.After)))
+	justPostList := justPostRepository.GetDataListByIndex("parentID",entity.ID(""),args.First, entity.ID(string(args.After)))
 	return &JustPostConnectionResolver{justPostList}
 }
 

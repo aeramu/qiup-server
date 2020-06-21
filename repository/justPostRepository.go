@@ -54,12 +54,15 @@ func (repository *JustPostRepositoryImplementation) GetDataListByIndex(indexName
 			},
 			bson.D{
 				{"_id", bson.D{
-					{"$gt", after},
+					{"$lt", after},
 				}},
 			},
 		}},
 	}
-	option := options.Find().SetLimit(int64(limit))
+	sort:= bson.D{
+		{"_id",-1},
+	}
+	option := options.Find().SetLimit(int64(limit)).SetSort(sort)
 	cursor,_ := repository.collection.Find(context.TODO(), filter, option)
 
 	var postList []*entity.JustPost
