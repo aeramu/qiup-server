@@ -17,7 +17,7 @@ var Schema = `
 		sharePostList: [SharePost]!
 
 		justPost(id: ID!): JustPost!
-		justPostList(first: Int=10, after: ID="ffffffffffffffffffffffff"): JustPostConnection!
+		justPostList(first: Int=20, after: ID="ffffffffffffffffffffffff"): JustPostConnection!
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
@@ -59,7 +59,7 @@ var Schema = `
 		name: String!
 		avatar: String!
 		body: String!
-		child(first: Int=10, after: ID=""): JustPostConnection!
+		child(first: Int=20, after: ID="ffffffffffffffffffffffff"): JustPostConnection!
 		replyCount: Int!
 	}
 	type JustPostConnection{
