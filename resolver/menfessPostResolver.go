@@ -122,3 +122,19 @@ func (r *Resolver) PostMenfessPost(args struct{
 	menfessPostRepository.PutData(post)
 	return &MenfessPostResolver{post}
 }
+
+func (r *Resolver) MenfessAvatarList()([]string){
+	avatarList := []string{
+		"https://qiup-image.s3.amazonaws.com/avatar/upin.jpg",
+		"https://qiup-image.s3.amazonaws.com/avatar/spiderman.jpg",
+		"https://qiup-image.s3.amazonaws.com/avatar/saitama.jpg",
+		"https://qiup-image.s3.amazonaws.com/avatar/ronald.jpg",
+		"https://qiup-image.s3.amazonaws.com/avatar/mrbean.jpg",
+		"https://qiup-image.s3.amazonaws.com/avatar/monalisa.jpg",
+		"https://qiup-image.s3.amazonaws.com/avatar/kaonashi.jpg",
+		"https://qiup-image.s3.amazonaws.com/avatar/ipin.jpg",
+		"https://qiup-image.s3.amazonaws.com/avatar/einstein.jpg",
+		"https://qiup-image.s3.amazonaws.com/avatar/batman.jpg",
+	}
+	return avatarList
+}

@@ -18,6 +18,7 @@ var Schema = `
 
 		menfessPost(id: ID!): MenfessPost!
 		menfessPostList(first: Int, after: ID, before: ID, sort: Int): MenfessPostConnection!
+		menfessAvatarList: [String!]!
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
