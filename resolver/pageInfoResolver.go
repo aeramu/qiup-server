@@ -6,19 +6,19 @@ import(
 )
 
 type PageInfoResolver struct{
-	justPostList []*entity.JustPost
+	menfessPostList []*entity.MenfessPost
 }
 func (r *PageInfoResolver) StartCursor()(*graphql.ID){
-	if (len(r.justPostList)==0){
+	if (len(r.menfessPostList) == 0){
 		return nil
 	}
-	startCursor := graphql.ID(r.justPostList[0].ID.Hex())
+	startCursor := graphql.ID(r.menfessPostList[0].ID.Hex())
 	return &startCursor
 }
 func (r *PageInfoResolver) EndCursor()(*graphql.ID){
-	if (len(r.justPostList)==0){
+	if (len(r.menfessPostList) == 0){
 		return nil
 	}
-	endCursor := graphql.ID(r.justPostList[len(r.justPostList)-1].ID.Hex())
+	endCursor := graphql.ID(r.menfessPostList[len(r.menfessPostList) - 1].ID.Hex())
 	return &endCursor
 }

@@ -9,36 +9,36 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type JustPostRepository interface{
-	GetDataByIndex(indexName string, indexValue interface{}) (*entity.JustPost)
-	GetDataList(limit int32, after primitive.ObjectID) ([]*entity.JustPost)
-	GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID) ([]*entity.JustPost)
-	PutData(account *entity.JustPost)
+type MenfessPostRepository interface{
+	GetDataByIndex(indexName string, indexValue interface{}) (*entity.MenfessPost)
+	GetDataList(limit int32, after primitive.ObjectID) ([]*entity.MenfessPost)
+	GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID) ([]*entity.MenfessPost)
+	PutData(account *entity.MenfessPost)
 	//UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) (*entity.ShareAccount)
 }
 
-func NewJustPostRepository()(JustPostRepository){
+func NewMenfessPostRepository()(MenfessPostRepository){
 	client,_ := mongo.Connect(context.Background(), options.Client().ApplyURI(
 		"mongodb+srv://admin:admin@qiup-wrbox.mongodb.net/",
 	))
-	return &JustPostRepositoryImplementation{
+	return &MenfessPostRepositoryImplementation{
 		client: client,
 		database: client.Database("qiup"),
 		collection: client.Database("qiup").Collection("justPost"),
 	}
 }
 
-type JustPostRepositoryImplementation struct{
+type MenfessPostRepositoryImplementation struct{
 	client *mongo.Client
 	database *mongo.Database
 	collection *mongo.Collection
 }
 
-func (repository *JustPostRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{})(*entity.JustPost){
+func (repository *MenfessPostRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{})(*entity.MenfessPost){
 	filter := bson.D{
 		{indexName,indexValue},
 	}
-	var post entity.JustPost
+	var post entity.MenfessPost
 	repository.collection.FindOne(context.TODO(), filter).Decode(&post)
 	if post.ID.IsZero() {
 		return nil
@@ -46,7 +46,7 @@ func (repository *JustPostRepositoryImplementation) GetDataByIndex(indexName str
 	return &post
 }
 
-func (repository *JustPostRepositoryImplementation) GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID)([]*entity.JustPost){
+func (repository *MenfessPostRepositoryImplementation) GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID)([]*entity.MenfessPost){
 	filter := bson.D{
 		{"$and", bson.A{
 			bson.D{
@@ -65,12 +65,12 @@ func (repository *JustPostRepositoryImplementation) GetDataListByIndex(indexName
 	option := options.Find().SetLimit(int64(limit)).SetSort(sort)
 	cursor,_ := repository.collection.Find(context.TODO(), filter, option)
 
-	var postList []*entity.JustPost
+	var postList []*entity.MenfessPost
 	cursor.All(context.TODO(), &postList)
 	return postList
 }
 
-func (repository *JustPostRepositoryImplementation) GetDataList(limit int32,after primitive.ObjectID)([]*entity.JustPost){
+func (repository *MenfessPostRepositoryImplementation) GetDataList(limit int32,after primitive.ObjectID)([]*entity.MenfessPost){
 	filter := bson.D{
 		{"_id",bson.D{
 			{"$lt",after},
@@ -82,12 +82,12 @@ func (repository *JustPostRepositoryImplementation) GetDataList(limit int32,afte
 	option := options.Find().SetLimit(int64(limit)).SetSort(sort)
 	cursor,_ := repository.collection.Find(context.TODO(), filter, option)
 	
-	var postList []*entity.JustPost
+	var postList []*entity.MenfessPost
 	cursor.All(context.TODO(), &postList)
 	return postList
 }
 
-func (repository *JustPostRepositoryImplementation) PutData(post *entity.JustPost){
+func (repository *MenfessPostRepositoryImplementation) PutData(post *entity.MenfessPost){
 	filter := bson.D{
 		{"_id", post.ParentID},
 	}

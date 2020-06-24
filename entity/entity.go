@@ -35,12 +35,3 @@ type SharePost struct{
 	AccountID primitive.ObjectID
 	Body string
 }
-
-type JustPost struct{
-	ID primitive.ObjectID `bson:"_id"`
-	ParentID primitive.ObjectID `bson:"parentID"`
-	Name string
-	Avatar string
-	Body string
-	ReplyCount int32 `bson:"replyCount"`
-}

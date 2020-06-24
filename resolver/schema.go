@@ -16,8 +16,8 @@ var Schema = `
 		sharePost(id: ID!): SharePost!
 		sharePostList: [SharePost]!
 
-		justPost(id: ID!): JustPost!
-		justPostList(first: Int=20, after: ID="ffffffffffffffffffffffff"): JustPostConnection!
+		menfessPost(id: ID!): MenfessPost!
+		menfessPostList(first: Int, after: ID, before: ID, sort: Int): MenfessPostConnection!
 	}
 	type Mutation{
 		login(email: String!, password: String!): String!
@@ -30,7 +30,7 @@ var Schema = `
 
 		postSharePost(body: String!): SharePost!
 
-		postJustPost(name: String!, avatar: String!, body: String!, parentID: ID=""): JustPost!
+		postMenfessPost(name: String!, avatar: String!, body: String!, parentID: ID=""): MenfessPost!
 
 		uploadImage(directory: String!): String!
 	}
@@ -52,18 +52,20 @@ var Schema = `
 		account: ShareAccount!
 		body: String!
 	}
-	type JustPost{
+	type MenfessPost{
 		id: ID!
 		timestamp: Int!
-		parent: JustPost
 		name: String!
 		avatar: String!
 		body: String!
-		child(first: Int=20, after: ID="ffffffffffffffffffffffff"): JustPostConnection!
 		replyCount: Int!
+		upvoteCount: Int!
+		downvoteCount: Int!
+		parent: MenfessPost
+		child(first: Int, after: ID, before: ID, sort: Int): MenfessPostConnection!
 	}
-	type JustPostConnection{
-		edges: [JustPost]!
+	type MenfessPostConnection{
+		edges: [MenfessPost]!
 		pageInfo: PageInfo!
 	}
 	type PageInfo{
