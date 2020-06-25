@@ -1,37 +1,45 @@
 package entity
 
-import(
+import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func ID(hex string)(primitive.ObjectID){
-	id,_ := primitive.ObjectIDFromHex(hex)
+//ID is function to convert from Hex to MongoDB ObjectID
+func ID(hex string) primitive.ObjectID {
+	id, _ := primitive.ObjectIDFromHex(hex)
 	return id
 }
-func NewID()(primitive.ObjectID){
+
+//NewID is function to create new MongoDB ObjectID
+func NewID() primitive.ObjectID {
 	return primitive.NewObjectID()
 }
 
-type Account struct{
-	ID primitive.ObjectID `bson:"_id"`
-	Email string
+//Account is db model of qiup account in repository
+type Account struct {
+	ID       primitive.ObjectID `bson:"_id"`
+	Email    string
 	Password string
 }
 
-type ShareAccount struct{
-	ID primitive.ObjectID `bson:"_id"`
-	Username string
+//ShareAccount is db model of share account in repository
+type ShareAccount struct {
+	ID           primitive.ObjectID `bson:"_id"`
+	Username     string
 	ShareProfile ShareProfile `bson:"shareProfile"`
 }
-type ShareProfile struct{
-	Name string
-	Bio string
+
+//ShareProfile is db model of share profile in repository
+type ShareProfile struct {
+	Name         string
+	Bio          string
 	ProfilePhoto string
-	CoverPhoto string
+	CoverPhoto   string
 }
 
-type SharePost struct{
-	ID primitive.ObjectID `bson:"_id"`
+//SharePost is db model of share post in repository
+type SharePost struct {
+	ID        primitive.ObjectID `bson:"_id"`
 	AccountID primitive.ObjectID
-	Body string
+	Body      string
 }
