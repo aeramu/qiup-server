@@ -4,6 +4,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+//Node is class that implement id
+type Node interface {
+	GetID() primitive.ObjectID
+}
+
 //ID is function to convert from Hex to MongoDB ObjectID
 func ID(hex string) primitive.ObjectID {
 	id, _ := primitive.ObjectIDFromHex(hex)

@@ -1,7 +1,9 @@
 package resolver
 
+//Resolver graphql
 type Resolver struct{}
 
+//Schema grahql
 var Schema = `
   	schema{
 		query: Query
@@ -31,7 +33,7 @@ var Schema = `
 
 		postSharePost(body: String!): SharePost!
 
-		postMenfessPost(name: String!, avatar: String!, body: String!, parentID: ID=""): MenfessPost!
+		postMenfessPost(name: String!, avatar: String!, body: String!, parentID: ID): MenfessPost!
 
 		uploadImage(directory: String!): String!
 	}

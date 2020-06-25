@@ -17,18 +17,44 @@ type MenfessPost struct {
 	ParentID      primitive.ObjectID `bson:"parentID"`
 }
 
-//NewMenfessPost constructor
-func NewMenfessPost(name string, avatar string, body string) *MenfessPost {
+// GetID node interface
+func (mp *MenfessPost) GetID() primitive.ObjectID {
+	return mp.ID
+}
+
+// NewMenfessPost constructor
+func NewMenfessPost(accountID primitive.ObjectID) *MenfessPost {
 	return &MenfessPost{
-		ID:     NewID(),
-		Name:   name,
-		Avatar: avatar,
-		Body:   body,
+		ID:        NewID(),
+		AccountID: accountID,
 	}
 }
 
-//SetParentID Setter parentID
+// SetName setter name
+func (mp *MenfessPost) SetName(name string) *MenfessPost {
+	mp.Name = name
+	return mp
+}
+
+// SetAvatar setter avatar
+func (mp *MenfessPost) SetAvatar(avatar string) *MenfessPost {
+	mp.Avatar = avatar
+	return mp
+}
+
+// SetBody setter body
+func (mp *MenfessPost) SetBody(body string) *MenfessPost {
+	mp.Body = body
+	return mp
+}
+
+// SetParentID setter parentID
 func (mp *MenfessPost) SetParentID(parentID primitive.ObjectID) *MenfessPost {
 	mp.ParentID = parentID
 	return mp
+}
+
+// Timestamp get timestamp from id
+func (mp *MenfessPost) Timestamp() int64 {
+	return mp.ID.Timestamp().Unix()
 }
