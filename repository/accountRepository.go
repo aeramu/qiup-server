@@ -45,11 +45,13 @@ func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName stri
 	return &account
 }
 
+//PutData put
 func (repository *AccountRepositoryImplementation) PutData(account *entity.Account) {
 	collection := repository.client.Database("qiup").Collection("account")
 	collection.InsertOne(context.TODO(), account)
 }
 
+//UpdateData update
 func (repository *AccountRepositoryImplementation) UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) *entity.Account {
 	collection := repository.client.Database("qiup").Collection("account")
 	collection.UpdateOne(context.TODO(), bson.D{{"_id", accountID}}, bson.D{{"$set", bson.D{{indexName, indexValue}}}})
