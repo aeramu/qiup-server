@@ -2,41 +2,42 @@ package repository
 
 import (
 	"context"
+
 	"github.com/aeramu/qiup-server/entity"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type MenfessPostRepository interface{
-	GetDataByIndex(indexName string, indexValue interface{}) (*entity.MenfessPost)
-	GetDataList(limit int32, after primitive.ObjectID) ([]*entity.MenfessPost)
-	GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID) ([]*entity.MenfessPost)
+type MenfessPostRepository interface {
+	GetDataByIndex(indexName string, indexValue interface{}) *entity.MenfessPost
+	GetDataList(limit int32, after primitive.ObjectID) []*entity.MenfessPost
+	GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID) []*entity.MenfessPost
 	PutData(account *entity.MenfessPost)
 	//UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) (*entity.ShareAccount)
 }
 
-func NewMenfessPostRepository()(MenfessPostRepository){
-	client,_ := mongo.Connect(context.Background(), options.Client().ApplyURI(
+func NewMenfessPostRepository() MenfessPostRepository {
+	client, _ := mongo.Connect(context.Background(), options.Client().ApplyURI(
 		"mongodb+srv://admin:admin@qiup-wrbox.mongodb.net/",
 	))
 	return &MenfessPostRepositoryImplementation{
-		client: client,
-		database: client.Database("qiup"),
+		client:     client,
+		database:   client.Database("qiup"),
 		collection: client.Database("qiup").Collection("justPost"),
 	}
 }
 
-type MenfessPostRepositoryImplementation struct{
-	client *mongo.Client
-	database *mongo.Database
+type MenfessPostRepositoryImplementation struct {
+	client     *mongo.Client
+	database   *mongo.Database
 	collection *mongo.Collection
 }
 
-func (repository *MenfessPostRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{})(*entity.MenfessPost){
+func (repository *MenfessPostRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{}) *entity.MenfessPost {
 	filter := bson.D{
-		{indexName,indexValue},
+		{indexName, indexValue},
 	}
 	var post entity.MenfessPost
 	repository.collection.FindOne(context.TODO(), filter).Decode(&post)
@@ -46,7 +47,7 @@ func (repository *MenfessPostRepositoryImplementation) GetDataByIndex(indexName 
 	return &post
 }
 
-func (repository *MenfessPostRepositoryImplementation) GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID)([]*entity.MenfessPost){
+func (repository *MenfessPostRepositoryImplementation) GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID) []*entity.MenfessPost {
 	filter := bson.D{
 		{"$and", bson.A{
 			bson.D{
@@ -59,41 +60,41 @@ func (repository *MenfessPostRepositoryImplementation) GetDataListByIndex(indexN
 			},
 		}},
 	}
-	sort:= bson.D{
-		{"_id",-1},
+	sort := bson.D{
+		{"_id", -1},
 	}
 	option := options.Find().SetLimit(int64(limit)).SetSort(sort)
-	cursor,_ := repository.collection.Find(context.TODO(), filter, option)
+	cursor, _ := repository.collection.Find(context.TODO(), filter, option)
 
 	var postList []*entity.MenfessPost
 	cursor.All(context.TODO(), &postList)
 	return postList
 }
 
-func (repository *MenfessPostRepositoryImplementation) GetDataList(limit int32,after primitive.ObjectID)([]*entity.MenfessPost){
+func (repository *MenfessPostRepositoryImplementation) GetDataList(limit int32, after primitive.ObjectID) []*entity.MenfessPost {
 	filter := bson.D{
-		{"_id",bson.D{
-			{"$lt",after},
+		{"_id", bson.D{
+			{"$lt", after},
 		}},
 	}
-	sort:= bson.D{
-		{"_id",-1},
+	sort := bson.D{
+		{"_id", -1},
 	}
 	option := options.Find().SetLimit(int64(limit)).SetSort(sort)
-	cursor,_ := repository.collection.Find(context.TODO(), filter, option)
-	
+	cursor, _ := repository.collection.Find(context.TODO(), filter, option)
+
 	var postList []*entity.MenfessPost
 	cursor.All(context.TODO(), &postList)
 	return postList
 }
 
-func (repository *MenfessPostRepositoryImplementation) PutData(post *entity.MenfessPost){
+func (repository *MenfessPostRepositoryImplementation) PutData(post *entity.MenfessPost) {
 	filter := bson.D{
 		{"_id", post.ParentID},
 	}
 	update := bson.D{
-		{"$inc",bson.D{
-			{"replyCount",1},
+		{"$inc", bson.D{
+			{"replyCount", 1},
 		}},
 	}
 	option := options.BulkWrite().SetOrdered(false)

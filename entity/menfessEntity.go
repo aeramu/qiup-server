@@ -16,3 +16,19 @@ type MenfessPost struct {
 	DownvoteCount int32              `bson:"downvoteCount"`
 	ParentID      primitive.ObjectID `bson:"parentID"`
 }
+
+//NewMenfessPost constructor
+func NewMenfessPost(name string, avatar string, body string) *MenfessPost {
+	return &MenfessPost{
+		ID:     NewID(),
+		Name:   name,
+		Avatar: avatar,
+		Body:   body,
+	}
+}
+
+//SetParentID Setter parentID
+func (mp *MenfessPost) SetParentID(parentID primitive.ObjectID) *MenfessPost {
+	mp.ParentID = parentID
+	return mp
+}

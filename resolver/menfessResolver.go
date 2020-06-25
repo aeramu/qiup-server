@@ -6,43 +6,63 @@ import (
 	"github.com/graph-gophers/graphql-go"
 )
 
+//MenfessPostResolver graphql
 type MenfessPostResolver struct {
 	post *entity.MenfessPost
 }
 
+//ID graphql
 func (r *MenfessPostResolver) ID() graphql.ID {
 	return graphql.ID(r.post.ID.Hex())
 }
+
+//Timestamp graphql
 func (r *MenfessPostResolver) Timestamp() int32 {
 	return int32(r.post.ID.Timestamp().Unix())
 }
+
+//Name graphql
 func (r *MenfessPostResolver) Name() string {
 	return r.post.Name
 }
+
+//Avatar graphql
 func (r *MenfessPostResolver) Avatar() string {
 	return r.post.Avatar
 }
+
+//Body graphql
 func (r *MenfessPostResolver) Body() string {
 	return r.post.Body
 }
+
+//ReplyCount graphql
 func (r *MenfessPostResolver) ReplyCount() int32 {
 	return r.post.ReplyCount
 }
+
+//UpvoteCount graphql
 func (r *MenfessPostResolver) UpvoteCount() int32 {
 	return r.post.UpvoteCount
 }
+
+//DownvoteCount graphql
 func (r *MenfessPostResolver) DownvoteCount() int32 {
 	return r.post.DownvoteCount
 }
+
+//Parent graphql
 func (r *MenfessPostResolver) Parent() *MenfessPostResolver {
 	menfessPostRepository := repository.NewMenfessPostRepository()
 	post := menfessPostRepository.GetDataByIndex("_id", r.post.ParentID)
 	if post == nil {
 		return nil
-	} else {
-		return &MenfessPostResolver{post}
 	}
+	return &MenfessPostResolver{post}
+
 }
+
+//Child graphql
 func (r *MenfessPostResolver) Child(args struct {
 	First  *int32
 	After  *graphql.ID
@@ -62,10 +82,12 @@ func (r *MenfessPostResolver) Child(args struct {
 	return &MenfessPostConnectionResolver{menfessPostList}
 }
 
+//MenfessPostConnectionResolver graphql
 type MenfessPostConnectionResolver struct {
 	menfessPostList []*entity.MenfessPost
 }
 
+//Edges graphql
 func (r *MenfessPostConnectionResolver) Edges() []*MenfessPostResolver {
 	var menfessPostResolverList []*MenfessPostResolver
 	for _, post := range r.menfessPostList {
@@ -73,10 +95,13 @@ func (r *MenfessPostConnectionResolver) Edges() []*MenfessPostResolver {
 	}
 	return menfessPostResolverList
 }
+
+//PageInfo graphql
 func (r *MenfessPostConnectionResolver) PageInfo() *PageInfoResolver {
 	return &PageInfoResolver{r.menfessPostList}
 }
 
+//MenfessPost graphql
 func (r *Resolver) MenfessPost(args struct {
 	ID graphql.ID
 }) *MenfessPostResolver {
@@ -85,6 +110,7 @@ func (r *Resolver) MenfessPost(args struct {
 	return &MenfessPostResolver{post}
 }
 
+//MenfessPostList graphql
 func (r *Resolver) MenfessPostList(args struct {
 	First  *int32
 	After  *graphql.ID
@@ -104,27 +130,20 @@ func (r *Resolver) MenfessPostList(args struct {
 	return &MenfessPostConnectionResolver{menfessPostList}
 }
 
+//PostMenfessPost graphql
 func (r *Resolver) PostMenfessPost(args struct {
 	Name     string
 	Avatar   string
 	Body     string
 	ParentID graphql.ID
 }) *MenfessPostResolver {
-	post := &entity.MenfessPost{
-		ID:            entity.NewID(),
-		Name:          args.Name,
-		Avatar:        args.Avatar,
-		Body:          args.Body,
-		ReplyCount:    0,
-		UpvoteCount:   0,
-		DownvoteCount: 0,
-		ParentID:      entity.ID(string(args.ParentID)),
-	}
+	post := entity.NewMenfessPost(args.Name, args.Avatar, args.Body).SetParentID(entity.ID(string(args.ParentID)))
 	menfessPostRepository := repository.NewMenfessPostRepository()
 	menfessPostRepository.PutData(post)
 	return &MenfessPostResolver{post}
 }
 
+//MenfessAvatarList graphql
 func (r *Resolver) MenfessAvatarList() []string {
 	avatarList := []string{
 		"https://qiup-image.s3.amazonaws.com/avatar/avatar.jpg",
