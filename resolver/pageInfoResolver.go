@@ -1,29 +1,32 @@
 package resolver
 
 import (
-	"github.com/aeramu/qiup-server/domain"
 	"github.com/graph-gophers/graphql-go"
 )
 
+type node interface {
+	GetID() string
+}
+
 //PageInfoResolver graphql
 type PageInfoResolver struct {
-	menfessPostList []domain.Node
+	nodeList []node
 }
 
 //StartCursor get startcursor
 func (r *PageInfoResolver) StartCursor() *graphql.ID {
-	if len(r.menfessPostList) == 0 {
+	if len(r.nodeList) == 0 {
 		return nil
 	}
-	startCursor := graphql.ID(r.menfessPostList[0].GetID().Hex())
+	startCursor := graphql.ID(r.nodeList[0].GetID())
 	return &startCursor
 }
 
 // EndCursor get endcursor
 func (r *PageInfoResolver) EndCursor() *graphql.ID {
-	if len(r.menfessPostList) == 0 {
+	if len(r.nodeList) == 0 {
 		return nil
 	}
-	endCursor := graphql.ID(r.menfessPostList[len(r.menfessPostList)-1].GetID().Hex())
+	endCursor := graphql.ID(r.nodeList[len(r.nodeList)-1].GetID())
 	return &endCursor
 }

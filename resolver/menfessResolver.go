@@ -1,24 +1,27 @@
 package resolver
 
 import (
-	"github.com/aeramu/qiup-server/domain"
-	"github.com/aeramu/qiup-server/repository"
+	"fmt"
+
+	"github.com/aeramu/qiup-server/entity"
+	"github.com/aeramu/qiup-server/usecase"
 	"github.com/graph-gophers/graphql-go"
 )
 
 // MenfessPostResolver graphql
 type MenfessPostResolver struct {
-	post *domain.MenfessPost
+	post       *entity.MenfessPost
+	Interactor usecase.Interactor
 }
 
 // ID graphql
 func (r *MenfessPostResolver) ID() graphql.ID {
-	return graphql.ID(r.post.ID.Hex())
+	return graphql.ID(r.post.ID)
 }
 
 // Timestamp graphql
 func (r *MenfessPostResolver) Timestamp() int32 {
-	return int32(r.post.Timestamp())
+	return int32(r.post.Timestamp)
 }
 
 // Name graphql
@@ -38,27 +41,28 @@ func (r *MenfessPostResolver) Body() string {
 
 // ReplyCount graphql
 func (r *MenfessPostResolver) ReplyCount() int32 {
-	return r.post.ReplyCount
+	return int32(r.post.ReplyCount)
 }
 
 // UpvoteCount graphql
 func (r *MenfessPostResolver) UpvoteCount() int32 {
-	return r.post.UpvoteCount
+	return 0
 }
 
 // DownvoteCount graphql
 func (r *MenfessPostResolver) DownvoteCount() int32 {
-	return r.post.DownvoteCount
+	return 0
 }
 
 // Parent graphql
 func (r *MenfessPostResolver) Parent() *MenfessPostResolver {
-	menfessPostRepository := repository.NewMenfessPostRepository()
-	post := menfessPostRepository.GetDataByIndex("_id", r.post.ParentID)
-	if post == nil {
-		return nil
-	}
-	return &MenfessPostResolver{post}
+	// menfessPostRepository := repository.NewMenfessPostRepository()
+	// post := menfessPostRepository.GetDataByIndex("_id", r.post.ParentID)
+	// if post == nil {
+	// 	return nil
+	// }
+	post := r.Interactor.MenfessPost(r.post.ParentID)
+	return &MenfessPostResolver{post, r.Interactor}
 }
 
 // Child graphql
@@ -68,43 +72,35 @@ func (r *MenfessPostResolver) Child(args struct {
 	Before *graphql.ID
 	Sort   *int32
 }) *MenfessPostConnectionResolver {
-	first := int32(20)
+	first := 20
 	if args.First != nil {
-		first = *args.First
+		first = int(*args.First)
 	}
-	sort := int32(1)
-	if args.Sort != nil {
-		sort = *args.Sort
-	}
-	after := domain.ID("")
-	if sort == -1 {
-		after = domain.ID("ffffffffffffffffffffffff")
-	}
-	if args.After != nil {
-		after = domain.ID(string(*args.After))
-	}
-	menfessPostRepository := repository.NewMenfessPostRepository()
-	menfessPostList := menfessPostRepository.GetDataListByIndex("parentID", r.post.ID, first, after, sort)
-	return &MenfessPostConnectionResolver{menfessPostList}
+	after := "000000000000000000000000"
+	// menfessPostRepository := repository.NewMenfessPostRepository()
+	// menfessPostList := menfessPostRepository.GetDataListByIndex("parentID", r.post.ID, first, after, sort)
+	postList := r.Interactor.MenfessPostChild(r.post.ID, first, after)
+	return &MenfessPostConnectionResolver{postList, r.Interactor}
 }
 
 // MenfessPostConnectionResolver graphql
 type MenfessPostConnectionResolver struct {
-	menfessPostList []*domain.MenfessPost
+	menfessPostList []*entity.MenfessPost
+	Interactor      usecase.Interactor
 }
 
 // Edges graphql
 func (r *MenfessPostConnectionResolver) Edges() []*MenfessPostResolver {
 	var menfessPostResolverList []*MenfessPostResolver
 	for _, post := range r.menfessPostList {
-		menfessPostResolverList = append(menfessPostResolverList, &MenfessPostResolver{post})
+		menfessPostResolverList = append(menfessPostResolverList, &MenfessPostResolver{post, r.Interactor})
 	}
 	return menfessPostResolverList
 }
 
 // PageInfo graphql
 func (r *MenfessPostConnectionResolver) PageInfo() *PageInfoResolver {
-	var nodeList []domain.Node
+	var nodeList []node
 	for _, node := range r.menfessPostList {
 		nodeList = append(nodeList, node)
 	}
@@ -116,7 +112,7 @@ func (r *Resolver) MenfessPost(args struct {
 	ID graphql.ID
 }) *MenfessPostResolver {
 	post := r.Interactor.MenfessPost(string(args.ID))
-	return &MenfessPostResolver{post}
+	return &MenfessPostResolver{post, r.Interactor}
 }
 
 // MenfessPostList graphql
@@ -124,26 +120,21 @@ func (r *Resolver) MenfessPostList(args struct {
 	First  *int32
 	After  *graphql.ID
 	Before *graphql.ID
-	Sort   *int32
+	Sort   *bool
 }) *MenfessPostConnectionResolver {
-	first := int32(20)
+	first := 20
 	if args.First != nil {
-		first = *args.First
+		first = int(*args.First)
 	}
-	sort := int32(-1)
-	if args.Sort != nil {
-		sort = *args.Sort
-	}
-	after := domain.ID("")
-	if sort == -1 {
-		after = domain.ID("ffffffffffffffffffffffff")
-	}
+	after := "ffffffffffffffffffffffff"
 	if args.After != nil {
-		after = domain.ID(string(*args.After))
+		after = string(*args.After)
 	}
-	menfessPostRepository := repository.NewMenfessPostRepository()
-	menfessPostList := menfessPostRepository.GetDataListByIndex("parentID", domain.ID(""), first, after, sort)
-	return &MenfessPostConnectionResolver{menfessPostList}
+	postList := r.Interactor.MenfessPostFeed(first, after)
+	fmt.Println(postList)
+	// menfessPostRepository := repository.NewMenfessPostRepository()
+	// menfessPostList := menfessPostRepository.GetDataListByIndex("parentID", domain.ID(""), first, after, sort)
+	return &MenfessPostConnectionResolver{postList, r.Interactor}
 }
 
 // PostMenfessPost graphql
@@ -153,14 +144,19 @@ func (r *Resolver) PostMenfessPost(args struct {
 	Body     string
 	ParentID *graphql.ID
 }) *MenfessPostResolver {
-	post := domain.NewMenfessPost(domain.ID("")).
-		SetName(args.Name).
-		SetAvatar(args.Avatar).
-		SetBody(args.Body).
-		SetParentID(domain.ID(string(*args.ParentID)))
-	menfessPostRepository := repository.NewMenfessPostRepository()
-	menfessPostRepository.PutData(post)
-	return &MenfessPostResolver{post}
+	parentID := ""
+	if args.ParentID != nil {
+		parentID = string(*args.ParentID)
+	}
+	post := r.Interactor.PostMenfessPost(args.Name, args.Avatar, args.Body, parentID)
+	// post := domain.NewMenfessPost(domain.ID("")).
+	// 	SetName(args.Name).
+	// 	SetAvatar(args.Avatar).
+	// 	SetBody(args.Body).
+	// 	SetParentID(domain.ID(string(*args.ParentID)))
+	// menfessPostRepository := repository.NewMenfessPostRepository()
+	// menfessPostRepository.PutData(post)
+	return &MenfessPostResolver{post, r.Interactor}
 }
 
 // MenfessAvatarList graphql
