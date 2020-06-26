@@ -3,7 +3,7 @@ package resolver
 import (
 	"context"
 
-	"github.com/aeramu/qiup-server/entity"
+	"github.com/aeramu/qiup-server/domain"
 	"github.com/aeramu/qiup-server/repository"
 	"github.com/aeramu/qiup-server/service"
 	"github.com/graph-gophers/graphql-go"
@@ -12,7 +12,7 @@ import (
 
 //AccountResolver graphql
 type AccountResolver struct {
-	account *entity.Account
+	account *domain.Account
 }
 
 //ID query
@@ -55,7 +55,7 @@ func (r *Resolver) Register(args struct {
 	if accountRepository.GetDataByIndex("email", args.Email) != nil {
 		return "Email already registered"
 	}
-	account := &entity.Account{
+	account := &domain.Account{
 		ID:       primitive.NewObjectID(),
 		Email:    args.Email,
 		Password: service.Hash(args.Password),

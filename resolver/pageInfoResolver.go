@@ -1,13 +1,13 @@
 package resolver
 
 import (
-	"github.com/aeramu/qiup-server/entity"
+	"github.com/aeramu/qiup-server/domain"
 	"github.com/graph-gophers/graphql-go"
 )
 
 //PageInfoResolver graphql
 type PageInfoResolver struct {
-	menfessPostList []entity.Node
+	menfessPostList []domain.Node
 }
 
 //StartCursor get startcursor

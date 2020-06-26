@@ -3,7 +3,7 @@ package resolver
 import (
 	"context"
 
-	"github.com/aeramu/qiup-server/entity"
+	"github.com/aeramu/qiup-server/domain"
 	"github.com/aeramu/qiup-server/repository"
 	"github.com/aeramu/qiup-server/service"
 	"github.com/graph-gophers/graphql-go"
@@ -12,7 +12,7 @@ import (
 
 // SharePostResolver graphql
 type SharePostResolver struct {
-	post *entity.SharePost
+	post *domain.SharePost
 }
 
 //ID query
@@ -64,7 +64,7 @@ func (r *Resolver) PostSharePost(ctx context.Context, args struct {
 }) *SharePostResolver {
 	token := ctx.Value("token").(string)
 	accountID, _ := primitive.ObjectIDFromHex(service.DecodeJWT(token))
-	post := &entity.SharePost{
+	post := &domain.SharePost{
 		ID:        primitive.NewObjectID(),
 		AccountID: accountID,
 		Body:      args.Body,

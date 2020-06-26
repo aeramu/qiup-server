@@ -3,7 +3,7 @@ package resolver
 import (
 	"context"
 
-	"github.com/aeramu/qiup-server/entity"
+	"github.com/aeramu/qiup-server/domain"
 	"github.com/aeramu/qiup-server/repository"
 	"github.com/aeramu/qiup-server/service"
 	"github.com/graph-gophers/graphql-go"
@@ -12,7 +12,7 @@ import (
 
 //ShareAccountResolver graphql
 type ShareAccountResolver struct {
-	account *entity.ShareAccount
+	account *domain.ShareAccount
 }
 
 //ID query
@@ -86,7 +86,7 @@ func (r *Resolver) SetShareUsername(ctx context.Context, args struct {
 		return "Username already taken"
 	}
 	id, _ := primitive.ObjectIDFromHex(service.DecodeJWT(token))
-	account := &entity.ShareAccount{
+	account := &domain.ShareAccount{
 		ID:       id,
 		Username: args.Username,
 	}
@@ -102,7 +102,7 @@ func (r *Resolver) SetShareProfile(ctx context.Context, args struct {
 	CoverPhoto   string
 }) *ShareAccountResolver {
 	token := ctx.Value("token").(string)
-	profile := &entity.ShareProfile{
+	profile := &domain.ShareProfile{
 		Name:         args.Name,
 		Bio:          args.Bio,
 		ProfilePhoto: args.ProfilePhoto,

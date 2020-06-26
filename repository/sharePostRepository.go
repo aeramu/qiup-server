@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/aeramu/qiup-server/entity"
+	"github.com/aeramu/qiup-server/domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -12,10 +12,10 @@ import (
 
 //SharePostRepository interface
 type SharePostRepository interface {
-	GetDataByIndex(indexName string, indexValue interface{}) *entity.SharePost
-	PutData(account *entity.SharePost)
-	GetDataList() []*entity.SharePost
-	//UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) (*entity.ShareAccount)
+	GetDataByIndex(indexName string, indexValue interface{}) *domain.SharePost
+	PutData(account *domain.SharePost)
+	GetDataList() []*domain.SharePost
+	//UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) (*domain.ShareAccount)
 }
 
 //NewSharePostRepository constructor
@@ -32,10 +32,10 @@ type sharePostRepositoryImplementation struct {
 	client *mongo.Client
 }
 
-func (repository *sharePostRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{}) *entity.SharePost {
+func (repository *sharePostRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{}) *domain.SharePost {
 	collection := repository.client.Database("qiup").Collection("sharePost")
 
-	var post entity.SharePost
+	var post domain.SharePost
 	collection.FindOne(context.TODO(), bson.D{{indexName, indexValue}}).Decode(&post)
 
 	if post.ID.IsZero() {
@@ -44,15 +44,15 @@ func (repository *sharePostRepositoryImplementation) GetDataByIndex(indexName st
 	return &post
 }
 
-func (repository *sharePostRepositoryImplementation) PutData(post *entity.SharePost) {
+func (repository *sharePostRepositoryImplementation) PutData(post *domain.SharePost) {
 	collection := repository.client.Database("qiup").Collection("sharePost")
 	collection.InsertOne(context.TODO(), post)
 }
 
-func (repository *sharePostRepositoryImplementation) GetDataList() []*entity.SharePost {
+func (repository *sharePostRepositoryImplementation) GetDataList() []*domain.SharePost {
 	collection := repository.client.Database("qiup").Collection("sharePost")
 
-	var postList []*entity.SharePost
+	var postList []*domain.SharePost
 	cursor, _ := collection.Find(context.TODO(), bson.D{})
 	cursor.All(context.TODO(), &postList)
 

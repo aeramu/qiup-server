@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/aeramu/qiup-server/entity"
+	"github.com/aeramu/qiup-server/domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,11 +12,11 @@ import (
 
 // MenfessPostRepository interface
 type MenfessPostRepository interface {
-	GetDataByIndex(indexName string, indexValue interface{}) *entity.MenfessPost
-	GetDataList(limit int32, after primitive.ObjectID) []*entity.MenfessPost
-	GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID, sort int32) []*entity.MenfessPost
-	PutData(account *entity.MenfessPost)
-	//UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) (*entity.ShareAccount)
+	GetDataByIndex(indexName string, indexValue interface{}) *domain.MenfessPost
+	GetDataList(limit int32, after primitive.ObjectID) []*domain.MenfessPost
+	GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID, sort int32) []*domain.MenfessPost
+	PutData(account *domain.MenfessPost)
+	//UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) (*domain.ShareAccount)
 }
 
 var client *mongo.Client = nil
@@ -43,11 +43,11 @@ type MenfessPostRepositoryImplementation struct {
 }
 
 // GetDataByIndex Get
-func (repository *MenfessPostRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{}) *entity.MenfessPost {
+func (repository *MenfessPostRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{}) *domain.MenfessPost {
 	filter := bson.D{
 		{indexName, indexValue},
 	}
-	var post entity.MenfessPost
+	var post domain.MenfessPost
 	repository.collection.FindOne(context.TODO(), filter).Decode(&post)
 	if post.ID.IsZero() {
 		return nil
@@ -56,7 +56,7 @@ func (repository *MenfessPostRepositoryImplementation) GetDataByIndex(indexName 
 }
 
 // GetDataListByIndex get
-func (repository *MenfessPostRepositoryImplementation) GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID, sort int32) []*entity.MenfessPost {
+func (repository *MenfessPostRepositoryImplementation) GetDataListByIndex(indexName string, indexValue interface{}, limit int32, after primitive.ObjectID, sort int32) []*domain.MenfessPost {
 	comparator := "$gt"
 	if sort == -1 {
 		comparator = "$lt"
@@ -79,13 +79,13 @@ func (repository *MenfessPostRepositoryImplementation) GetDataListByIndex(indexN
 	option := options.Find().SetLimit(int64(limit)).SetSort(sortOpt)
 	cursor, _ := repository.collection.Find(context.TODO(), filter, option)
 
-	var postList []*entity.MenfessPost
+	var postList []*domain.MenfessPost
 	cursor.All(context.TODO(), &postList)
 	return postList
 }
 
 // GetDataList get
-func (repository *MenfessPostRepositoryImplementation) GetDataList(limit int32, after primitive.ObjectID) []*entity.MenfessPost {
+func (repository *MenfessPostRepositoryImplementation) GetDataList(limit int32, after primitive.ObjectID) []*domain.MenfessPost {
 	filter := bson.D{
 		{"_id", bson.D{
 			{"$lt", after},
@@ -97,13 +97,13 @@ func (repository *MenfessPostRepositoryImplementation) GetDataList(limit int32, 
 	option := options.Find().SetLimit(int64(limit)).SetSort(sort)
 	cursor, _ := repository.collection.Find(context.TODO(), filter, option)
 
-	var postList []*entity.MenfessPost
+	var postList []*domain.MenfessPost
 	cursor.All(context.TODO(), &postList)
 	return postList
 }
 
 //PutData put
-func (repository *MenfessPostRepositoryImplementation) PutData(post *entity.MenfessPost) {
+func (repository *MenfessPostRepositoryImplementation) PutData(post *domain.MenfessPost) {
 	filter := bson.D{
 		{"_id", post.ParentID},
 	}

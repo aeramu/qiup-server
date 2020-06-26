@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/aeramu/qiup-server/entity"
+	"github.com/aeramu/qiup-server/domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,9 +12,9 @@ import (
 
 // AccountRepository is an interface for account repository
 type AccountRepository interface {
-	GetDataByIndex(indexName string, indexValue interface{}) *entity.Account
-	PutData(account *entity.Account)
-	UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) *entity.Account
+	GetDataByIndex(indexName string, indexValue interface{}) *domain.Account
+	PutData(account *domain.Account)
+	UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) *domain.Account
 }
 
 // NewAccountRepository is Constructor for AccountRepository
@@ -33,10 +33,10 @@ type AccountRepositoryImplementation struct {
 }
 
 // GetDataByIndex is query for getting data list
-func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{}) *entity.Account {
+func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName string, indexValue interface{}) *domain.Account {
 	collection := repository.client.Database("qiup").Collection("account")
 
-	var account entity.Account
+	var account domain.Account
 	collection.FindOne(context.TODO(), bson.D{{indexName, indexValue}}).Decode(&account)
 
 	if account.ID.IsZero() {
@@ -46,17 +46,17 @@ func (repository *AccountRepositoryImplementation) GetDataByIndex(indexName stri
 }
 
 //PutData put
-func (repository *AccountRepositoryImplementation) PutData(account *entity.Account) {
+func (repository *AccountRepositoryImplementation) PutData(account *domain.Account) {
 	collection := repository.client.Database("qiup").Collection("account")
 	collection.InsertOne(context.TODO(), account)
 }
 
 //UpdateData update
-func (repository *AccountRepositoryImplementation) UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) *entity.Account {
+func (repository *AccountRepositoryImplementation) UpdateData(accountID primitive.ObjectID, indexName string, indexValue interface{}) *domain.Account {
 	collection := repository.client.Database("qiup").Collection("account")
 	collection.UpdateOne(context.TODO(), bson.D{{"_id", accountID}}, bson.D{{"$set", bson.D{{indexName, indexValue}}}})
 
-	var account entity.Account
+	var account domain.Account
 	collection.FindOne(context.TODO(), bson.D{{indexName, indexValue}}).Decode(&account)
 
 	return &account

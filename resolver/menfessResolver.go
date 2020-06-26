@@ -1,14 +1,14 @@
 package resolver
 
 import (
-	"github.com/aeramu/qiup-server/entity"
+	"github.com/aeramu/qiup-server/domain"
 	"github.com/aeramu/qiup-server/repository"
 	"github.com/graph-gophers/graphql-go"
 )
 
 // MenfessPostResolver graphql
 type MenfessPostResolver struct {
-	post *entity.MenfessPost
+	post *domain.MenfessPost
 }
 
 // ID graphql
@@ -76,12 +76,12 @@ func (r *MenfessPostResolver) Child(args struct {
 	if args.Sort != nil {
 		sort = *args.Sort
 	}
-	after := entity.ID("")
+	after := domain.ID("")
 	if sort == -1 {
-		after = entity.ID("ffffffffffffffffffffffff")
+		after = domain.ID("ffffffffffffffffffffffff")
 	}
 	if args.After != nil {
-		after = entity.ID(string(*args.After))
+		after = domain.ID(string(*args.After))
 	}
 	menfessPostRepository := repository.NewMenfessPostRepository()
 	menfessPostList := menfessPostRepository.GetDataListByIndex("parentID", r.post.ID, first, after, sort)
@@ -90,7 +90,7 @@ func (r *MenfessPostResolver) Child(args struct {
 
 // MenfessPostConnectionResolver graphql
 type MenfessPostConnectionResolver struct {
-	menfessPostList []*entity.MenfessPost
+	menfessPostList []*domain.MenfessPost
 }
 
 // Edges graphql
@@ -104,7 +104,7 @@ func (r *MenfessPostConnectionResolver) Edges() []*MenfessPostResolver {
 
 // PageInfo graphql
 func (r *MenfessPostConnectionResolver) PageInfo() *PageInfoResolver {
-	var nodeList []entity.Node
+	var nodeList []domain.Node
 	for _, node := range r.menfessPostList {
 		nodeList = append(nodeList, node)
 	}
@@ -115,8 +115,7 @@ func (r *MenfessPostConnectionResolver) PageInfo() *PageInfoResolver {
 func (r *Resolver) MenfessPost(args struct {
 	ID graphql.ID
 }) *MenfessPostResolver {
-	menfessPostRepository := repository.NewMenfessPostRepository()
-	post := menfessPostRepository.GetDataByIndex("_id", entity.ID(string(args.ID)))
+	post := r.Interactor.MenfessPost(string(args.ID))
 	return &MenfessPostResolver{post}
 }
 
@@ -135,15 +134,15 @@ func (r *Resolver) MenfessPostList(args struct {
 	if args.Sort != nil {
 		sort = *args.Sort
 	}
-	after := entity.ID("")
+	after := domain.ID("")
 	if sort == -1 {
-		after = entity.ID("ffffffffffffffffffffffff")
+		after = domain.ID("ffffffffffffffffffffffff")
 	}
 	if args.After != nil {
-		after = entity.ID(string(*args.After))
+		after = domain.ID(string(*args.After))
 	}
 	menfessPostRepository := repository.NewMenfessPostRepository()
-	menfessPostList := menfessPostRepository.GetDataListByIndex("parentID", entity.ID(""), first, after, sort)
+	menfessPostList := menfessPostRepository.GetDataListByIndex("parentID", domain.ID(""), first, after, sort)
 	return &MenfessPostConnectionResolver{menfessPostList}
 }
 
@@ -154,11 +153,11 @@ func (r *Resolver) PostMenfessPost(args struct {
 	Body     string
 	ParentID *graphql.ID
 }) *MenfessPostResolver {
-	post := entity.NewMenfessPost(entity.ID("")).
+	post := domain.NewMenfessPost(domain.ID("")).
 		SetName(args.Name).
 		SetAvatar(args.Avatar).
 		SetBody(args.Body).
-		SetParentID(entity.ID(string(*args.ParentID)))
+		SetParentID(domain.ID(string(*args.ParentID)))
 	menfessPostRepository := repository.NewMenfessPostRepository()
 	menfessPostRepository.PutData(post)
 	return &MenfessPostResolver{post}
