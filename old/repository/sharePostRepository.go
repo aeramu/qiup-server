@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 
-	"github.com/aeramu/qiup-server/domain"
+	"github.com/aeramu/qiup-server/old/domain"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

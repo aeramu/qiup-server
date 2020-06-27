@@ -142,17 +142,19 @@ func (r *Resolver) PostMenfessPost(args struct {
 
 //UpvoteMenfessPost graphql
 func (r *Resolver) UpvoteMenfessPost(args struct {
-	PostID graphql.ID
+	AccountID graphql.ID
+	PostID    graphql.ID
 }) *MenfessPostResolver {
-	post := r.Interactor.UpvoteMenfessPost("5ef61bca42d1d2abea7571cf", string(args.PostID))
+	post := r.Interactor.UpvoteMenfessPost(string(args.AccountID), string(args.PostID))
 	return &MenfessPostResolver{post, r.Interactor}
 }
 
 //DownvoteMenfessPost graphql
 func (r *Resolver) DownvoteMenfessPost(args struct {
-	PostID graphql.ID
+	AccountID graphql.ID
+	PostID    graphql.ID
 }) *MenfessPostResolver {
-	post := r.Interactor.DownvoteMenfessPost("5ef61bca42d1d2abea7571cf", string(args.PostID))
+	post := r.Interactor.DownvoteMenfessPost(string(args.AccountID), string(args.PostID))
 	return &MenfessPostResolver{post, r.Interactor}
 }
 
