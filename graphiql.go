@@ -7,7 +7,6 @@ import (
 	cleanrepo "github.com/aeramu/qiup-server/implementation/mongodb.repository"
 	"github.com/aeramu/qiup-server/resolver"
 	"github.com/aeramu/qiup-server/usecase"
-	"github.com/friendsofgo/graphiql"
 	"github.com/graph-gophers/graphql-go"
 	"github.com/graph-gophers/graphql-go/relay"
 )
@@ -18,13 +17,13 @@ func main() {
 			MenfessPostRepo: cleanrepo.New(),
 		}.New(),
 	})
-	http.Handle("/query", &relay.Handler{Schema: schema})
+	http.Handle("/", &relay.Handler{Schema: schema})
 
-	graphiqlHandler, err := graphiql.NewGraphiqlHandler("/query")
-	if err != nil {
-		panic(err)
-	}
-	http.Handle("/", graphiqlHandler)
+	// graphiqlHandler, err := graphiql.NewGraphiqlHandler("/query")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// http.Handle("/", graphiqlHandler)
 
 	log.Println("Server ready at 8000")
 	log.Fatal(http.ListenAndServe(":8000", nil))

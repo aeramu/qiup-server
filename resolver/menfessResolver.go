@@ -165,7 +165,7 @@ func (r *Resolver) PostMenfessPost(args struct {
 func (r *Resolver) UpvoteMenfessPost(args struct {
 	PostID graphql.ID
 }) *MenfessPostResolver {
-	accountID := r.Context.Value("id").(string)
+	accountID := r.Context.Value("request").(map[string]string)["id"]
 	post := r.Interactor.UpvoteMenfessPost(accountID, string(args.PostID))
 	return &MenfessPostResolver{post, r}
 }
@@ -174,7 +174,7 @@ func (r *Resolver) UpvoteMenfessPost(args struct {
 func (r *Resolver) DownvoteMenfessPost(args struct {
 	PostID graphql.ID
 }) *MenfessPostResolver {
-	accountID := r.Context.Value("id").(string)
+	accountID := r.Context.Value("request").(map[string]string)["id"]
 	post := r.Interactor.DownvoteMenfessPost(accountID, string(args.PostID))
 	return &MenfessPostResolver{post, r}
 }
