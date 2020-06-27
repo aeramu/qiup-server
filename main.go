@@ -26,10 +26,11 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	json.Unmarshal([]byte(request.Body), &parameter)
 
 	//add token from header
-	ctxWithToken := context.WithValue(ctx, "token", request.Headers["token"])
+	context := context.WithValue(ctx, "token", request.Headers)
 
 	//graphql execution
 	schema := graphql.MustParseSchema(resolver.Schema, &resolver.Resolver{
+		Context: context,
 		Interactor: usecase.InteractorConstructor{
 			MenfessPostRepo: cleanrepo.New(),
 		}.New(),

@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -82,7 +81,6 @@ func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, a
 
 	var postList []*menfessPost
 	cursor.All(context.TODO(), &postList)
-	fmt.Println(postList)
 
 	return postListToEntity(postList)
 }

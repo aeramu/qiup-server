@@ -2,14 +2,13 @@ package resolver
 
 import (
 	"github.com/aeramu/qiup-server/entity"
-	"github.com/aeramu/qiup-server/usecase"
 	"github.com/graph-gophers/graphql-go"
 )
 
 // MenfessPostResolver graphql
 type MenfessPostResolver struct {
-	post       *entity.MenfessPost
-	Interactor usecase.Interactor
+	post *entity.MenfessPost
+	pr   *Resolver
 }
 
 // ID graphql
@@ -52,10 +51,32 @@ func (r *MenfessPostResolver) DownvoteCount() int32 {
 	return int32(r.post.DownvoteCount)
 }
 
+//Upvoted bool
+func (r *MenfessPostResolver) Upvoted() bool {
+	accountID := ""
+	for _, id := range r.post.UpvoterIDs {
+		if id == accountID {
+			return true
+		}
+	}
+	return false
+}
+
+//Downvoted bool
+func (r *MenfessPostResolver) Downvoted() bool {
+	accountID := ""
+	for _, id := range r.post.DownvoterIDs {
+		if id == accountID {
+			return true
+		}
+	}
+	return false
+}
+
 // Parent graphql
 func (r *MenfessPostResolver) Parent() *MenfessPostResolver {
-	post := r.Interactor.MenfessPost(r.post.ParentID)
-	return &MenfessPostResolver{post, r.Interactor}
+	post := r.pr.Interactor.MenfessPost(r.post.ParentID)
+	return &MenfessPostResolver{post, r.pr}
 }
 
 // Child graphql
@@ -70,21 +91,21 @@ func (r *MenfessPostResolver) Child(args struct {
 		first = int(*args.First)
 	}
 	after := "000000000000000000000000"
-	postList := r.Interactor.MenfessPostChild(r.post.ID, first, after)
-	return &MenfessPostConnectionResolver{postList, r.Interactor}
+	postList := r.pr.Interactor.MenfessPostChild(r.post.ID, first, after)
+	return &MenfessPostConnectionResolver{postList, r.pr}
 }
 
 // MenfessPostConnectionResolver graphql
 type MenfessPostConnectionResolver struct {
 	menfessPostList []*entity.MenfessPost
-	Interactor      usecase.Interactor
+	pr              *Resolver
 }
 
 // Edges graphql
 func (r *MenfessPostConnectionResolver) Edges() []*MenfessPostResolver {
 	var menfessPostResolverList []*MenfessPostResolver
 	for _, post := range r.menfessPostList {
-		menfessPostResolverList = append(menfessPostResolverList, &MenfessPostResolver{post, r.Interactor})
+		menfessPostResolverList = append(menfessPostResolverList, &MenfessPostResolver{post, r.pr})
 	}
 	return menfessPostResolverList
 }
@@ -103,7 +124,7 @@ func (r *Resolver) MenfessPost(args struct {
 	ID graphql.ID
 }) *MenfessPostResolver {
 	post := r.Interactor.MenfessPost(string(args.ID))
-	return &MenfessPostResolver{post, r.Interactor}
+	return &MenfessPostResolver{post, r}
 }
 
 // MenfessPostList graphql
@@ -122,7 +143,7 @@ func (r *Resolver) MenfessPostList(args struct {
 		after = string(*args.After)
 	}
 	postList := r.Interactor.MenfessPostFeed(first, after)
-	return &MenfessPostConnectionResolver{postList, r.Interactor}
+	return &MenfessPostConnectionResolver{postList, r}
 }
 
 // PostMenfessPost graphql
@@ -137,25 +158,25 @@ func (r *Resolver) PostMenfessPost(args struct {
 		parentID = string(*args.ParentID)
 	}
 	post := r.Interactor.PostMenfessPost(args.Name, args.Avatar, args.Body, parentID)
-	return &MenfessPostResolver{post, r.Interactor}
+	return &MenfessPostResolver{post, r}
 }
 
 //UpvoteMenfessPost graphql
 func (r *Resolver) UpvoteMenfessPost(args struct {
-	AccountID graphql.ID
-	PostID    graphql.ID
+	PostID graphql.ID
 }) *MenfessPostResolver {
-	post := r.Interactor.UpvoteMenfessPost(string(args.AccountID), string(args.PostID))
-	return &MenfessPostResolver{post, r.Interactor}
+	accountID := r.Context.Value("id").(string)
+	post := r.Interactor.UpvoteMenfessPost(accountID, string(args.PostID))
+	return &MenfessPostResolver{post, r}
 }
 
 //DownvoteMenfessPost graphql
 func (r *Resolver) DownvoteMenfessPost(args struct {
-	AccountID graphql.ID
-	PostID    graphql.ID
+	PostID graphql.ID
 }) *MenfessPostResolver {
-	post := r.Interactor.DownvoteMenfessPost(string(args.AccountID), string(args.PostID))
-	return &MenfessPostResolver{post, r.Interactor}
+	accountID := r.Context.Value("id").(string)
+	post := r.Interactor.DownvoteMenfessPost(accountID, string(args.PostID))
+	return &MenfessPostResolver{post, r}
 }
 
 // MenfessAvatarList graphql

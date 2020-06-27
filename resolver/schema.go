@@ -1,12 +1,15 @@
 package resolver
 
 import (
+	"context"
+
 	"github.com/aeramu/qiup-server/usecase"
 )
 
 //Resolver graphql
 type Resolver struct {
 	Interactor usecase.Interactor
+	Context    context.Context
 }
 
 //Schema grahql
