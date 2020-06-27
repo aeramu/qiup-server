@@ -3,9 +3,9 @@ package resolver
 import (
 	"context"
 
-	"github.com/aeramu/qiup-server/domain"
-	"github.com/aeramu/qiup-server/repository"
-	"github.com/aeramu/qiup-server/service"
+	"github.com/aeramu/qiup-server/old/domain"
+	"github.com/aeramu/qiup-server/old/repository"
+	"github.com/aeramu/qiup-server/old/service"
 	"github.com/graph-gophers/graphql-go"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
