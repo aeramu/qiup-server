@@ -56,8 +56,8 @@ func (i *interactor) MenfessPostChild(parentID string, first int, after string) 
 
 func (i *interactor) PostMenfessPost(name string, avatar string, body string, parentID string) *entity.MenfessPost {
 	id, timestamp := i.menfessPostRepo.NewID()
+	//TODO create in repo implementation
 	post := &entity.MenfessPost{
-		// TODO make id generator
 		ID:         id,
 		Timestamp:  timestamp,
 		Name:       name,
