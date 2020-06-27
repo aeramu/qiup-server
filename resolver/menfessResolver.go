@@ -53,7 +53,7 @@ func (r *MenfessPostResolver) DownvoteCount() int32 {
 
 //Upvoted bool
 func (r *MenfessPostResolver) Upvoted() bool {
-	accountID := ""
+	accountID := r.pr.Context.Value("request").(map[string]string)["id"]
 	for _, id := range r.post.UpvoterIDs {
 		if id == accountID {
 			return true
@@ -64,7 +64,7 @@ func (r *MenfessPostResolver) Upvoted() bool {
 
 //Downvoted bool
 func (r *MenfessPostResolver) Downvoted() bool {
-	accountID := ""
+	accountID := r.pr.Context.Value("request").(map[string]string)["id"]
 	for _, id := range r.post.DownvoterIDs {
 		if id == accountID {
 			return true

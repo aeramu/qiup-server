@@ -75,6 +75,8 @@ var Schema = `
 		replyCount: Int!
 		upvoteCount: Int!
 		downvoteCount: Int!
+		upvoted: Boolean!
+		downvoted: Boolean!
 		parent: MenfessPost
 		child(first: Int, after: ID, before: ID, sort: Int): MenfessPostConnection!
 	}

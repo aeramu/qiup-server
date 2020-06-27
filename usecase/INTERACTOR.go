@@ -73,25 +73,35 @@ func (i *interactor) PostMenfessPost(name string, avatar string, body string, pa
 
 func (i *interactor) UpvoteMenfessPost(accountID string, postID string) *entity.MenfessPost {
 	post := i.menfessPostRepo.GetDataByID(postID)
-	if stringInSlice(accountID, post.UpvoterIDs) {
-		i.menfessPostRepo.Unvote(postID, accountID, true)
-		post.UpvoteCount--
-	} else {
-		i.menfessPostRepo.Vote(postID, accountID, true)
-		post.UpvoteCount++
+	for index, id := range post.UpvoterIDs {
+		if id == accountID {
+			i.menfessPostRepo.Unvote(postID, accountID, true)
+			post.UpvoteCount--
+			post.UpvoterIDs[index] = post.UpvoterIDs[len(post.UpvoterIDs)-1]
+			post.UpvoterIDs = post.UpvoterIDs[:len(post.UpvoterIDs)-1]
+			return post
+		}
 	}
+	i.menfessPostRepo.Vote(postID, accountID, true)
+	post.UpvoteCount++
+	post.UpvoterIDs = append(post.UpvoterIDs, accountID)
 	return post
 }
 
 func (i *interactor) DownvoteMenfessPost(accountID string, postID string) *entity.MenfessPost {
 	post := i.menfessPostRepo.GetDataByID(postID)
-	if stringInSlice(accountID, post.DownvoterIDs) {
-		i.menfessPostRepo.Unvote(postID, accountID, false)
-		post.DownvoteCount--
-	} else {
-		i.menfessPostRepo.Vote(postID, accountID, false)
-		post.DownvoteCount++
+	for index, id := range post.DownvoterIDs {
+		if id == accountID {
+			i.menfessPostRepo.Unvote(postID, accountID, false)
+			post.DownvoteCount--
+			post.DownvoterIDs[index] = post.DownvoterIDs[len(post.DownvoterIDs)-1]
+			post.DownvoterIDs = post.DownvoterIDs[:len(post.DownvoterIDs)-1]
+			return post
+		}
 	}
+	i.menfessPostRepo.Vote(postID, accountID, false)
+	post.DownvoteCount++
+	post.DownvoterIDs = append(post.DownvoterIDs, accountID)
 	return post
 }
 
