@@ -2,13 +2,17 @@ package entity
 
 //MenfessPost entity
 type MenfessPost struct {
-	ID         string
-	Timestamp  int
-	Name       string
-	Avatar     string
-	Body       string
-	ReplyCount int
-	ParentID   string
+	ID            string
+	Timestamp     int
+	Name          string
+	Avatar        string
+	Body          string
+	UpvoterIDs    []string
+	DownvoterIDs  []string
+	UpvoteCount   int
+	DownvoteCount int
+	ReplyCount    int
+	ParentID      string
 }
 
 //GetID interface node

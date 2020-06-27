@@ -1,8 +1,6 @@
 package usecase
 
 import (
-	"fmt"
-
 	"github.com/aeramu/qiup-server/entity"
 )
 
@@ -12,6 +10,8 @@ type Interactor interface {
 	MenfessPostFeed(first int, after string) []*entity.MenfessPost
 	MenfessPostChild(parentID string, first int, after string) []*entity.MenfessPost
 	PostMenfessPost(name string, avatar string, body string, parentID string) *entity.MenfessPost
+	UpvoteMenfessPost(accountID string, postID string) *entity.MenfessPost
+	DownvoteMenfessPost(accountID string, postID string) *entity.MenfessPost
 }
 
 //InteractorConstructor constructor
@@ -36,6 +36,8 @@ type MenfessPostRepo interface {
 	GetDataByID(id string) *entity.MenfessPost
 	GetDataListByParentID(parentID string, first int, after string, ascSort bool) []*entity.MenfessPost
 	PutData(post *entity.MenfessPost)
+	Vote(postID string, accountID string, isUpvote bool)
+	Unvote(postID string, accountID string, isUpvote bool)
 }
 
 func (i *interactor) MenfessPost(id string) *entity.MenfessPost {
@@ -45,7 +47,6 @@ func (i *interactor) MenfessPost(id string) *entity.MenfessPost {
 
 func (i *interactor) MenfessPostFeed(first int, after string) []*entity.MenfessPost {
 	postList := i.menfessPostRepo.GetDataListByParentID("", first, after, false)
-	fmt.Println(postList)
 	return postList
 }
 
@@ -68,4 +69,37 @@ func (i *interactor) PostMenfessPost(name string, avatar string, body string, pa
 	}
 	i.menfessPostRepo.PutData(post)
 	return post
+}
+
+func (i *interactor) UpvoteMenfessPost(accountID string, postID string) *entity.MenfessPost {
+	post := i.menfessPostRepo.GetDataByID(postID)
+	if stringInSlice(accountID, post.UpvoterIDs) {
+		i.menfessPostRepo.Unvote(postID, accountID, true)
+		post.UpvoteCount--
+	} else {
+		i.menfessPostRepo.Vote(postID, accountID, true)
+		post.UpvoteCount++
+	}
+	return post
+}
+
+func (i *interactor) DownvoteMenfessPost(accountID string, postID string) *entity.MenfessPost {
+	post := i.menfessPostRepo.GetDataByID(postID)
+	if stringInSlice(accountID, post.DownvoterIDs) {
+		i.menfessPostRepo.Unvote(postID, accountID, false)
+		post.DownvoteCount--
+	} else {
+		i.menfessPostRepo.Vote(postID, accountID, false)
+		post.DownvoteCount++
+	}
+	return post
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
 }

@@ -84,7 +84,7 @@ func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, a
 	cursor.All(context.TODO(), &postList)
 	fmt.Println(postList)
 
-	return postListToEntityList(postList)
+	return postListToEntity(postList)
 }
 
 func (repo *menfessPostRepo) PutData(e *entity.MenfessPost) {
@@ -114,28 +114,78 @@ func (repo *menfessPostRepo) PutData(e *entity.MenfessPost) {
 	repo.collection.BulkWrite(context.TODO(), models, option)
 }
 
+func (repo *menfessPostRepo) Vote(postID string, accountID string, isUpvote bool) {
+	listName := "downvoterIDs"
+	if isUpvote {
+		listName = "upvoterIDs"
+	}
+	accountid, _ := primitive.ObjectIDFromHex(accountID)
+	postid, _ := primitive.ObjectIDFromHex(postID)
+	filter := bson.D{
+		{"_id", postid},
+	}
+	update := bson.D{
+		{"$addToSet", bson.D{
+			{listName, accountid},
+		}},
+	}
+	repo.collection.UpdateOne(context.TODO(), filter, update)
+}
+
+func (repo *menfessPostRepo) Unvote(postID string, accountID string, isUpvote bool) {
+	listName := "downvoterIDs"
+	if isUpvote {
+		listName = "upvoterIDs"
+	}
+	accountid, _ := primitive.ObjectIDFromHex(accountID)
+	postid, _ := primitive.ObjectIDFromHex(postID)
+	filter := bson.D{
+		{"_id", postid},
+	}
+	update := bson.D{
+		{"$pull", bson.D{
+			{listName, accountid},
+		}},
+	}
+	repo.collection.UpdateOne(context.TODO(), filter, update)
+}
+
 type menfessPost struct {
-	ID         primitive.ObjectID `bson:"_id"`
-	Name       string
-	Avatar     string
-	Body       string
-	ReplyCount int                `bson:"replyCount"`
-	ParentID   primitive.ObjectID `bson:"parentID"`
+	ID           primitive.ObjectID `bson:"_id"`
+	Name         string
+	Avatar       string
+	Body         string
+	UpvoterIDs   []primitive.ObjectID `bson:"upvoterIDs"`
+	DownvoterIDs []primitive.ObjectID `bson:"downvoterIDs"`
+	ReplyCount   int                  `bson:"replyCount"`
+	ParentID     primitive.ObjectID   `bson:"parentID"`
 }
 
 func (m *menfessPost) entity() *entity.MenfessPost {
 	return &entity.MenfessPost{
-		ID:         m.ID.Hex(),
-		Timestamp:  int(m.ID.Timestamp().Unix()),
-		Name:       m.Name,
-		Avatar:     m.Avatar,
-		Body:       m.Body,
-		ReplyCount: m.ReplyCount,
-		ParentID:   m.ParentID.Hex(),
+		ID:            m.ID.Hex(),
+		Timestamp:     int(m.ID.Timestamp().Unix()),
+		Name:          m.Name,
+		Avatar:        m.Avatar,
+		Body:          m.Body,
+		UpvoterIDs:    idListToEntity(m.UpvoterIDs),
+		DownvoterIDs:  idListToEntity(m.DownvoterIDs),
+		UpvoteCount:   len(m.UpvoterIDs),
+		DownvoteCount: len(m.DownvoterIDs),
+		ReplyCount:    m.ReplyCount,
+		ParentID:      m.ParentID.Hex(),
 	}
 }
 
-func postListToEntityList(list []*menfessPost) []*entity.MenfessPost {
+func idListToEntity(list []primitive.ObjectID) []string {
+	var idList []string
+	for _, id := range list {
+		idList = append(idList, id.Hex())
+	}
+	return idList
+}
+
+func postListToEntity(list []*menfessPost) []*entity.MenfessPost {
 	var postList []*entity.MenfessPost
 	for _, post := range list {
 		postList = append(postList, post.entity())

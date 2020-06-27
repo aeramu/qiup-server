@@ -40,6 +40,8 @@ var Schema = `
 		postSharePost(body: String!): SharePost!
 
 		postMenfessPost(name: String!, avatar: String!, body: String!, parentID: ID): MenfessPost!
+		upvoteMenfessPost(postID: ID!): MenfessPost!
+		downvoteMenfessPost(postID: ID!): MenfessPost!
 
 		uploadImage(directory: String!): String!
 	}

@@ -1,8 +1,6 @@
 package resolver
 
 import (
-	"fmt"
-
 	"github.com/aeramu/qiup-server/entity"
 	"github.com/aeramu/qiup-server/usecase"
 	"github.com/graph-gophers/graphql-go"
@@ -46,21 +44,16 @@ func (r *MenfessPostResolver) ReplyCount() int32 {
 
 // UpvoteCount graphql
 func (r *MenfessPostResolver) UpvoteCount() int32 {
-	return 0
+	return int32(r.post.UpvoteCount)
 }
 
 // DownvoteCount graphql
 func (r *MenfessPostResolver) DownvoteCount() int32 {
-	return 0
+	return int32(r.post.DownvoteCount)
 }
 
 // Parent graphql
 func (r *MenfessPostResolver) Parent() *MenfessPostResolver {
-	// menfessPostRepository := repository.NewMenfessPostRepository()
-	// post := menfessPostRepository.GetDataByIndex("_id", r.post.ParentID)
-	// if post == nil {
-	// 	return nil
-	// }
 	post := r.Interactor.MenfessPost(r.post.ParentID)
 	return &MenfessPostResolver{post, r.Interactor}
 }
@@ -77,8 +70,6 @@ func (r *MenfessPostResolver) Child(args struct {
 		first = int(*args.First)
 	}
 	after := "000000000000000000000000"
-	// menfessPostRepository := repository.NewMenfessPostRepository()
-	// menfessPostList := menfessPostRepository.GetDataListByIndex("parentID", r.post.ID, first, after, sort)
 	postList := r.Interactor.MenfessPostChild(r.post.ID, first, after)
 	return &MenfessPostConnectionResolver{postList, r.Interactor}
 }
@@ -131,9 +122,6 @@ func (r *Resolver) MenfessPostList(args struct {
 		after = string(*args.After)
 	}
 	postList := r.Interactor.MenfessPostFeed(first, after)
-	fmt.Println(postList)
-	// menfessPostRepository := repository.NewMenfessPostRepository()
-	// menfessPostList := menfessPostRepository.GetDataListByIndex("parentID", domain.ID(""), first, after, sort)
 	return &MenfessPostConnectionResolver{postList, r.Interactor}
 }
 
@@ -149,13 +137,22 @@ func (r *Resolver) PostMenfessPost(args struct {
 		parentID = string(*args.ParentID)
 	}
 	post := r.Interactor.PostMenfessPost(args.Name, args.Avatar, args.Body, parentID)
-	// post := domain.NewMenfessPost(domain.ID("")).
-	// 	SetName(args.Name).
-	// 	SetAvatar(args.Avatar).
-	// 	SetBody(args.Body).
-	// 	SetParentID(domain.ID(string(*args.ParentID)))
-	// menfessPostRepository := repository.NewMenfessPostRepository()
-	// menfessPostRepository.PutData(post)
+	return &MenfessPostResolver{post, r.Interactor}
+}
+
+//UpvoteMenfessPost graphql
+func (r *Resolver) UpvoteMenfessPost(args struct {
+	PostID graphql.ID
+}) *MenfessPostResolver {
+	post := r.Interactor.UpvoteMenfessPost("5ef61bca42d1d2abea7571cf", string(args.PostID))
+	return &MenfessPostResolver{post, r.Interactor}
+}
+
+//DownvoteMenfessPost graphql
+func (r *Resolver) DownvoteMenfessPost(args struct {
+	PostID graphql.ID
+}) *MenfessPostResolver {
+	post := r.Interactor.DownvoteMenfessPost("5ef61bca42d1d2abea7571cf", string(args.PostID))
 	return &MenfessPostResolver{post, r.Interactor}
 }
 
