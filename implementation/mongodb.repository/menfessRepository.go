@@ -77,8 +77,18 @@ func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, a
 	return modelListToEntity(modelList)
 }
 
-func (repo *menfessPostRepo) PutData(e entity.MenfessPost) {
-	model := newModel(e)
+func (repo *menfessPostRepo) PutData(name string, avatar string, body string, parentID string) entity.MenfessPost {
+	parentid, _ := primitive.ObjectIDFromHex(parentID)
+	model := &model{
+		ID:           primitive.NewObjectID(),
+		Name:         name,
+		Avatar:       avatar,
+		Body:         body,
+		UpvoterIDs:   map[string]bool{},
+		DownvoterIDs: map[string]bool{},
+		ReplyCount:   0,
+		ParentID:     parentid,
+	}
 	filter := bson.D{{"_id", model.ParentID}}
 	update := bson.D{
 		{"$inc", bson.D{
@@ -91,6 +101,8 @@ func (repo *menfessPostRepo) PutData(e entity.MenfessPost) {
 		mongo.NewUpdateOneModel().SetFilter(filter).SetUpdate(update).SetUpsert(true),
 	}
 	repo.collection.BulkWrite(context.TODO(), models, option)
+
+	return model.toEntity()
 }
 
 func (repo *menfessPostRepo) UpdateUpvoterIDs(postID string, accountID string, exist bool) {
