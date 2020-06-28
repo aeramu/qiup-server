@@ -40,13 +40,15 @@ func (repo *menfessPostRepo) NewID() string {
 
 func (repo *menfessPostRepo) GetDataByID(id string) entity.MenfessPost {
 	objectID, _ := primitive.ObjectIDFromHex(id)
+
 	filter := bson.D{{"_id", objectID}}
 	var post model
 	repo.collection.FindOne(context.TODO(), filter).Decode(&post)
+
 	if post.ID.IsZero() {
 		return nil
 	}
-	return post.toEntity()
+	return post.Entity()
 }
 
 func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, after string, ascSort bool) []entity.MenfessPost {
@@ -58,6 +60,7 @@ func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, a
 		comparator = "$gt"
 		sort = 1
 	}
+
 	filter := bson.D{
 		{"$and", bson.A{
 			bson.D{{"parentID", parentid}},
@@ -78,17 +81,8 @@ func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, a
 }
 
 func (repo *menfessPostRepo) PutData(name string, avatar string, body string, parentID string) entity.MenfessPost {
-	parentid, _ := primitive.ObjectIDFromHex(parentID)
-	model := &model{
-		ID:           primitive.NewObjectID(),
-		Name:         name,
-		Avatar:       avatar,
-		Body:         body,
-		UpvoterIDs:   map[string]bool{},
-		DownvoterIDs: map[string]bool{},
-		ReplyCount:   0,
-		ParentID:     parentid,
-	}
+	model := newModel(name, avatar, body, parentID)
+
 	filter := bson.D{{"_id", model.ParentID}}
 	update := bson.D{
 		{"$inc", bson.D{
@@ -102,7 +96,7 @@ func (repo *menfessPostRepo) PutData(name string, avatar string, body string, pa
 	}
 	repo.collection.BulkWrite(context.TODO(), models, option)
 
-	return model.toEntity()
+	return model.Entity()
 }
 
 func (repo *menfessPostRepo) UpdateUpvoterIDs(postID string, accountID string, exist bool) {
@@ -111,6 +105,7 @@ func (repo *menfessPostRepo) UpdateUpvoterIDs(postID string, accountID string, e
 		operator = "$unset"
 	}
 	postid, _ := primitive.ObjectIDFromHex(postID)
+
 	filter := bson.D{{"_id", postid}}
 	update := bson.D{
 		{operator, bson.D{
@@ -126,6 +121,7 @@ func (repo *menfessPostRepo) UpdateDownvoterIDs(postID string, accountID string,
 		operator = "$unset"
 	}
 	postid, _ := primitive.ObjectIDFromHex(postID)
+
 	filter := bson.D{{"_id", postid}}
 	update := bson.D{
 		{operator, bson.D{
@@ -133,52 +129,4 @@ func (repo *menfessPostRepo) UpdateDownvoterIDs(postID string, accountID string,
 		}},
 	}
 	repo.collection.UpdateOne(context.TODO(), filter, update)
-}
-
-type model struct {
-	ID           primitive.ObjectID `bson:"_id"`
-	Name         string
-	Avatar       string
-	Body         string
-	UpvoterIDs   map[string]bool    `bson:"upvoterIDs"`
-	DownvoterIDs map[string]bool    `bson:"downvoterIDs"`
-	ReplyCount   int                `bson:"replyCount"`
-	ParentID     primitive.ObjectID `bson:"parentID"`
-}
-
-func newModel(e entity.MenfessPost) *model {
-	id, _ := primitive.ObjectIDFromHex(e.ID())
-	parentID, _ := primitive.ObjectIDFromHex(e.ParentID())
-	return &model{
-		ID:           id,
-		Name:         e.Name(),
-		Avatar:       e.Avatar(),
-		Body:         e.Body(),
-		UpvoterIDs:   e.UpvoterIDs(),
-		DownvoterIDs: e.DownvoterIDs(),
-		ReplyCount:   e.ReplyCount(),
-		ParentID:     parentID,
-	}
-}
-
-func (m *model) toEntity() entity.MenfessPost {
-	return entity.MenfessPostConstructor{
-		ID:           m.ID.Hex(),
-		Timestamp:    int(m.ID.Timestamp().Unix()),
-		Name:         m.Name,
-		Avatar:       m.Avatar,
-		Body:         m.Body,
-		UpvoterIDs:   m.UpvoterIDs,
-		DownvoterIDs: m.DownvoterIDs,
-		ReplyCount:   m.ReplyCount,
-		ParentID:     m.ParentID.Hex(),
-	}.New()
-}
-
-func modelListToEntity(modelList []*model) []entity.MenfessPost {
-	var entityList []entity.MenfessPost
-	for _, model := range modelList {
-		entityList = append(entityList, model.toEntity())
-	}
-	return entityList
 }
