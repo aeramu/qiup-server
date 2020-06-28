@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -52,9 +51,7 @@ func (repo *menfessPostRepo) GetDataByID(id string) entity.MenfessPost {
 
 func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, after string, ascSort bool) []entity.MenfessPost {
 	parentid, _ := primitive.ObjectIDFromHex(parentID)
-	fmt.Println(parentid)
 	afterid, _ := primitive.ObjectIDFromHex(after)
-	fmt.Println(afterid)
 	comparator := "$lt"
 	sort := -1
 	if ascSort {
@@ -77,7 +74,6 @@ func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, a
 
 	var modelList []*model
 	cursor.All(context.TODO(), &modelList)
-	fmt.Println(modelList)
 	return modelListToEntity(modelList)
 }
 
