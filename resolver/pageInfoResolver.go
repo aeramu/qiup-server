@@ -5,7 +5,7 @@ import (
 )
 
 type node interface {
-	GetID() string
+	ID() string
 }
 
 //PageInfoResolver graphql
@@ -18,7 +18,7 @@ func (r *PageInfoResolver) StartCursor() *graphql.ID {
 	if len(r.nodeList) == 0 {
 		return nil
 	}
-	startCursor := graphql.ID(r.nodeList[0].GetID())
+	startCursor := graphql.ID(r.nodeList[0].ID())
 	return &startCursor
 }
 
@@ -27,6 +27,6 @@ func (r *PageInfoResolver) EndCursor() *graphql.ID {
 	if len(r.nodeList) == 0 {
 		return nil
 	}
-	endCursor := graphql.ID(r.nodeList[len(r.nodeList)-1].GetID())
+	endCursor := graphql.ID(r.nodeList[len(r.nodeList)-1].ID())
 	return &endCursor
 }

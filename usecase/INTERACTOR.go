@@ -1,17 +1,19 @@
 package usecase
 
 import (
+	"time"
+
 	"github.com/aeramu/qiup-server/entity"
 )
 
 //Interactor interface
 type Interactor interface {
-	MenfessPost(id string) *entity.MenfessPost
-	MenfessPostFeed(first int, after string) []*entity.MenfessPost
-	MenfessPostChild(parentID string, first int, after string) []*entity.MenfessPost
-	PostMenfessPost(name string, avatar string, body string, parentID string) *entity.MenfessPost
-	UpvoteMenfessPost(accountID string, postID string) *entity.MenfessPost
-	DownvoteMenfessPost(accountID string, postID string) *entity.MenfessPost
+	MenfessPost(id string) entity.MenfessPost
+	MenfessPostFeed(first int, after string) []entity.MenfessPost
+	MenfessPostChild(parentID string, first int, after string) []entity.MenfessPost
+	PostMenfessPost(name string, avatar string, body string, parentID string) entity.MenfessPost
+	UpvoteMenfessPost(accountID string, postID string) entity.MenfessPost
+	DownvoteMenfessPost(accountID string, postID string) entity.MenfessPost
 }
 
 //InteractorConstructor constructor
@@ -32,84 +34,61 @@ type interactor struct {
 
 //MenfessPostRepo interface
 type MenfessPostRepo interface {
-	NewID() (string, int)
-	GetDataByID(id string) *entity.MenfessPost
-	GetDataListByParentID(parentID string, first int, after string, ascSort bool) []*entity.MenfessPost
-	PutData(post *entity.MenfessPost)
-	Vote(postID string, accountID string, isUpvote bool)
-	Unvote(postID string, accountID string, isUpvote bool)
+	NewID() string
+	GetDataByID(id string) entity.MenfessPost
+	GetDataListByParentID(parentID string, first int, after string, ascSort bool) []entity.MenfessPost
+	PutData(post entity.MenfessPost)
+	UpdateUpvoterIDs(postID string, accountID string, exist bool)
+	UpdateDownvoterIDs(postID string, accountID string, exist bool)
 }
 
-func (i *interactor) MenfessPost(id string) *entity.MenfessPost {
+func (i *interactor) MenfessPost(id string) entity.MenfessPost {
 	post := i.menfessPostRepo.GetDataByID(id)
 	return post
 }
 
-func (i *interactor) MenfessPostFeed(first int, after string) []*entity.MenfessPost {
+func (i *interactor) MenfessPostFeed(first int, after string) []entity.MenfessPost {
 	postList := i.menfessPostRepo.GetDataListByParentID("", first, after, false)
 	return postList
 }
 
-func (i *interactor) MenfessPostChild(parentID string, first int, after string) []*entity.MenfessPost {
+func (i *interactor) MenfessPostChild(parentID string, first int, after string) []entity.MenfessPost {
 	postList := i.menfessPostRepo.GetDataListByParentID(parentID, first, after, true)
 	return postList
 }
 
-func (i *interactor) PostMenfessPost(name string, avatar string, body string, parentID string) *entity.MenfessPost {
-	id, timestamp := i.menfessPostRepo.NewID()
-	//TODO create in repo implementation
-	post := &entity.MenfessPost{
-		ID:         id,
-		Timestamp:  timestamp,
-		Name:       name,
-		Avatar:     avatar,
-		Body:       body,
-		ReplyCount: 0,
-		ParentID:   parentID,
-	}
+func (i *interactor) PostMenfessPost(name string, avatar string, body string, parentID string) entity.MenfessPost {
+	id := i.menfessPostRepo.NewID()
+	post := entity.MenfessPostConstructor{
+		ID:        id,
+		Timestamp: int(time.Now().Unix()),
+		Name:      name,
+		Avatar:    avatar,
+		Body:      body,
+		ParentID:  parentID,
+	}.New()
 	i.menfessPostRepo.PutData(post)
 	return post
 }
 
-func (i *interactor) UpvoteMenfessPost(accountID string, postID string) *entity.MenfessPost {
+func (i *interactor) UpvoteMenfessPost(accountID string, postID string) entity.MenfessPost {
 	post := i.menfessPostRepo.GetDataByID(postID)
-	for index, id := range post.UpvoterIDs {
-		if id == accountID {
-			i.menfessPostRepo.Unvote(postID, accountID, true)
-			post.UpvoteCount--
-			post.UpvoterIDs[index] = post.UpvoterIDs[len(post.UpvoterIDs)-1]
-			post.UpvoterIDs = post.UpvoterIDs[:len(post.UpvoterIDs)-1]
-			return post
-		}
+	if post.IsDownvoted(accountID) {
+		exist := post.Downvote(accountID)
+		i.menfessPostRepo.UpdateDownvoterIDs(postID, accountID, exist)
 	}
-	i.menfessPostRepo.Vote(postID, accountID, true)
-	post.UpvoteCount++
-	post.UpvoterIDs = append(post.UpvoterIDs, accountID)
+	exist := post.Upvote(accountID)
+	i.menfessPostRepo.UpdateUpvoterIDs(postID, accountID, exist)
 	return post
 }
 
-func (i *interactor) DownvoteMenfessPost(accountID string, postID string) *entity.MenfessPost {
+func (i *interactor) DownvoteMenfessPost(accountID string, postID string) entity.MenfessPost {
 	post := i.menfessPostRepo.GetDataByID(postID)
-	for index, id := range post.DownvoterIDs {
-		if id == accountID {
-			i.menfessPostRepo.Unvote(postID, accountID, false)
-			post.DownvoteCount--
-			post.DownvoterIDs[index] = post.DownvoterIDs[len(post.DownvoterIDs)-1]
-			post.DownvoterIDs = post.DownvoterIDs[:len(post.DownvoterIDs)-1]
-			return post
-		}
+	if post.IsUpvoted(accountID) {
+		exist := post.Upvote(accountID)
+		i.menfessPostRepo.UpdateUpvoterIDs(postID, accountID, exist)
 	}
-	i.menfessPostRepo.Vote(postID, accountID, false)
-	post.DownvoteCount++
-	post.DownvoterIDs = append(post.DownvoterIDs, accountID)
+	exist := post.Downvote(accountID)
+	i.menfessPostRepo.UpdateDownvoterIDs(postID, accountID, exist)
 	return post
-}
-
-func stringInSlice(a string, list []string) bool {
-	for _, b := range list {
-		if b == a {
-			return true
-		}
-	}
-	return false
 }

@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -34,27 +35,26 @@ type menfessPostRepo struct {
 	collection *mongo.Collection
 }
 
-func (repo *menfessPostRepo) NewID() (string, int) {
-	id := primitive.NewObjectID()
-	return id.Hex(), int(id.Timestamp().Unix())
+func (repo *menfessPostRepo) NewID() string {
+	return primitive.NewObjectID().Hex()
 }
 
-func (repo *menfessPostRepo) GetDataByID(id string) *entity.MenfessPost {
+func (repo *menfessPostRepo) GetDataByID(id string) entity.MenfessPost {
 	objectID, _ := primitive.ObjectIDFromHex(id)
-	filter := bson.D{
-		{"_id", objectID},
-	}
-	var post menfessPost
+	filter := bson.D{{"_id", objectID}}
+	var post model
 	repo.collection.FindOne(context.TODO(), filter).Decode(&post)
 	if post.ID.IsZero() {
 		return nil
 	}
-	return post.entity()
+	return post.toEntity()
 }
 
-func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, after string, ascSort bool) []*entity.MenfessPost {
+func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, after string, ascSort bool) []entity.MenfessPost {
 	parentid, _ := primitive.ObjectIDFromHex(parentID)
+	fmt.Println(parentid)
 	afterid, _ := primitive.ObjectIDFromHex(after)
+	fmt.Println(afterid)
 	comparator := "$lt"
 	sort := -1
 	if ascSort {
@@ -63,9 +63,7 @@ func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, a
 	}
 	filter := bson.D{
 		{"$and", bson.A{
-			bson.D{
-				{"parentID", parentid},
-			},
+			bson.D{{"parentID", parentid}},
 			bson.D{
 				{"_id", bson.D{
 					{comparator, afterid},
@@ -73,32 +71,19 @@ func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, a
 			},
 		}},
 	}
-	sortOpt := bson.D{
-		{"_id", sort},
-	}
+	sortOpt := bson.D{{"_id", sort}}
 	option := options.Find().SetLimit(int64(first)).SetSort(sortOpt)
 	cursor, _ := repo.collection.Find(context.TODO(), filter, option)
 
-	var postList []*menfessPost
-	cursor.All(context.TODO(), &postList)
-
-	return postListToEntity(postList)
+	var modelList []*model
+	cursor.All(context.TODO(), &modelList)
+	fmt.Println(modelList)
+	return modelListToEntity(modelList)
 }
 
-func (repo *menfessPostRepo) PutData(e *entity.MenfessPost) {
-	id, _ := primitive.ObjectIDFromHex(e.ID)
-	parentID, _ := primitive.ObjectIDFromHex(e.ParentID)
-	post := &menfessPost{
-		ID:         id,
-		Name:       e.Name,
-		Avatar:     e.Avatar,
-		Body:       e.Body,
-		ReplyCount: e.ReplyCount,
-		ParentID:   parentID,
-	}
-	filter := bson.D{
-		{"_id", post.ParentID},
-	}
+func (repo *menfessPostRepo) PutData(e entity.MenfessPost) {
+	model := newModel(e)
+	filter := bson.D{{"_id", model.ParentID}}
 	update := bson.D{
 		{"$inc", bson.D{
 			{"replyCount", 1},
@@ -106,87 +91,86 @@ func (repo *menfessPostRepo) PutData(e *entity.MenfessPost) {
 	}
 	option := options.BulkWrite().SetOrdered(false)
 	models := []mongo.WriteModel{
-		mongo.NewInsertOneModel().SetDocument(post),
+		mongo.NewInsertOneModel().SetDocument(model),
 		mongo.NewUpdateOneModel().SetFilter(filter).SetUpdate(update).SetUpsert(true),
 	}
 	repo.collection.BulkWrite(context.TODO(), models, option)
 }
 
-func (repo *menfessPostRepo) Vote(postID string, accountID string, isUpvote bool) {
-	listName := "downvoterIDs"
-	if isUpvote {
-		listName = "upvoterIDs"
+func (repo *menfessPostRepo) UpdateUpvoterIDs(postID string, accountID string, exist bool) {
+	operator := "$set"
+	if exist {
+		operator = "$unset"
 	}
-	accountid, _ := primitive.ObjectIDFromHex(accountID)
 	postid, _ := primitive.ObjectIDFromHex(postID)
-	filter := bson.D{
-		{"_id", postid},
-	}
+	filter := bson.D{{"_id", postid}}
 	update := bson.D{
-		{"$addToSet", bson.D{
-			{listName, accountid},
+		{operator, bson.D{
+			{"upvoterIDs." + accountID, true},
 		}},
 	}
 	repo.collection.UpdateOne(context.TODO(), filter, update)
 }
 
-func (repo *menfessPostRepo) Unvote(postID string, accountID string, isUpvote bool) {
-	listName := "downvoterIDs"
-	if isUpvote {
-		listName = "upvoterIDs"
+func (repo *menfessPostRepo) UpdateDownvoterIDs(postID string, accountID string, exist bool) {
+	operator := "$set"
+	if exist {
+		operator = "$unset"
 	}
-	accountid, _ := primitive.ObjectIDFromHex(accountID)
 	postid, _ := primitive.ObjectIDFromHex(postID)
-	filter := bson.D{
-		{"_id", postid},
-	}
+	filter := bson.D{{"_id", postid}}
 	update := bson.D{
-		{"$pull", bson.D{
-			{listName, accountid},
+		{operator, bson.D{
+			{"downvoterIDs." + accountID, true},
 		}},
 	}
 	repo.collection.UpdateOne(context.TODO(), filter, update)
 }
 
-type menfessPost struct {
+type model struct {
 	ID           primitive.ObjectID `bson:"_id"`
 	Name         string
 	Avatar       string
 	Body         string
-	UpvoterIDs   []primitive.ObjectID `bson:"upvoterIDs"`
-	DownvoterIDs []primitive.ObjectID `bson:"downvoterIDs"`
-	ReplyCount   int                  `bson:"replyCount"`
-	ParentID     primitive.ObjectID   `bson:"parentID"`
+	UpvoterIDs   map[string]bool    `bson:"upvoterIDs"`
+	DownvoterIDs map[string]bool    `bson:"downvoterIDs"`
+	ReplyCount   int                `bson:"replyCount"`
+	ParentID     primitive.ObjectID `bson:"parentID"`
 }
 
-func (m *menfessPost) entity() *entity.MenfessPost {
-	return &entity.MenfessPost{
-		ID:            m.ID.Hex(),
-		Timestamp:     int(m.ID.Timestamp().Unix()),
-		Name:          m.Name,
-		Avatar:        m.Avatar,
-		Body:          m.Body,
-		UpvoterIDs:    idListToEntity(m.UpvoterIDs),
-		DownvoterIDs:  idListToEntity(m.DownvoterIDs),
-		UpvoteCount:   len(m.UpvoterIDs),
-		DownvoteCount: len(m.DownvoterIDs),
-		ReplyCount:    m.ReplyCount,
-		ParentID:      m.ParentID.Hex(),
+func newModel(e entity.MenfessPost) *model {
+	id, _ := primitive.ObjectIDFromHex(e.ID())
+	parentID, _ := primitive.ObjectIDFromHex(e.ParentID())
+	return &model{
+		ID:           id,
+		Name:         e.Name(),
+		Avatar:       e.Avatar(),
+		Body:         e.Body(),
+		UpvoterIDs:   e.UpvoterIDs(),
+		DownvoterIDs: e.DownvoterIDs(),
+		ReplyCount:   e.ReplyCount(),
+		ParentID:     parentID,
 	}
 }
 
-func idListToEntity(list []primitive.ObjectID) []string {
-	var idList []string
-	for _, id := range list {
-		idList = append(idList, id.Hex())
-	}
-	return idList
+func (m *model) toEntity() entity.MenfessPost {
+	return entity.MenfessPostConstructor{
+		ID:           m.ID.Hex(),
+		Timestamp:    int(m.ID.Timestamp().Unix()),
+		Name:         m.Name,
+		Avatar:       m.Avatar,
+		Body:         m.Body,
+		UpvoterIDs:   m.UpvoterIDs,
+		DownvoterIDs: m.DownvoterIDs,
+		ReplyCount:   m.ReplyCount,
+		ParentID:     m.ParentID.Hex(),
+	}.New()
 }
 
-func postListToEntity(list []*menfessPost) []*entity.MenfessPost {
-	var postList []*entity.MenfessPost
-	for _, post := range list {
-		postList = append(postList, post.entity())
+func modelListToEntity(modelList []*model) []entity.MenfessPost {
+	var entityList []entity.MenfessPost
+	for _, model := range modelList {
+		entityList = append(entityList, model.toEntity())
 	}
-	return postList
+	return entityList
 }
