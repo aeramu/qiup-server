@@ -66,6 +66,18 @@ func (r *MenfessPostResolver) Downvoted() bool {
 // Parent graphql
 func (r *MenfessPostResolver) Parent() *MenfessPostResolver {
 	post := r.pr.Interactor.MenfessPost(r.post.ParentID())
+	if post == nil {
+		return nil
+	}
+	return &MenfessPostResolver{post, r.pr}
+}
+
+//Repost graphql
+func (r *MenfessPostResolver) Repost() *MenfessPostResolver {
+	post := r.pr.Interactor.MenfessPost(r.post.RepostID())
+	if post == nil {
+		return nil
+	}
 	return &MenfessPostResolver{post, r.pr}
 }
 
@@ -143,12 +155,17 @@ func (r *Resolver) PostMenfessPost(args struct {
 	Avatar   string
 	Body     string
 	ParentID *graphql.ID
+	RepostID *graphql.ID
 }) *MenfessPostResolver {
 	parentID := ""
 	if args.ParentID != nil {
 		parentID = string(*args.ParentID)
 	}
-	post := r.Interactor.PostMenfessPost(args.Name, args.Avatar, args.Body, parentID)
+	repostID := ""
+	if args.RepostID != nil {
+		repostID = string(*args.RepostID)
+	}
+	post := r.Interactor.PostMenfessPost(args.Name, args.Avatar, args.Body, parentID, repostID)
 	return &MenfessPostResolver{post, r}
 }
 

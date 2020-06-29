@@ -42,7 +42,7 @@ var Schema = `
 
 		postSharePost(body: String!): SharePost!
 
-		postMenfessPost(name: String!, avatar: String!, body: String!, parentID: ID): MenfessPost!
+		postMenfessPost(name: String!, avatar: String!, body: String!, parentID: ID, repostID: ID): MenfessPost!
 		upvoteMenfessPost(postID: ID!): MenfessPost!
 		downvoteMenfessPost(postID: ID!): MenfessPost!
 
@@ -78,6 +78,7 @@ var Schema = `
 		upvoted: Boolean!
 		downvoted: Boolean!
 		parent: MenfessPost
+		repost: MenfessPost
 		child(first: Int, after: ID, before: ID, sort: Int): MenfessPostConnection!
 	}
 	type MenfessPostConnection{

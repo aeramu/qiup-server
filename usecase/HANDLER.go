@@ -7,7 +7,7 @@ type Interactor interface {
 	MenfessPost(id string) entity.MenfessPost
 	MenfessPostFeed(first int, after string) []entity.MenfessPost
 	MenfessPostChild(parentID string, first int, after string) []entity.MenfessPost
-	PostMenfessPost(name string, avatar string, body string, parentID string) entity.MenfessPost
+	PostMenfessPost(name string, avatar string, body string, parentID string, repostID string) entity.MenfessPost
 	UpvoteMenfessPost(accountID string, postID string) entity.MenfessPost
 	DownvoteMenfessPost(accountID string, postID string) entity.MenfessPost
 }

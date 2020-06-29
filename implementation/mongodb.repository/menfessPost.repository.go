@@ -80,9 +80,8 @@ func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, a
 	return modelListToEntity(modelList)
 }
 
-func (repo *menfessPostRepo) PutData(name string, avatar string, body string, parentID string) entity.MenfessPost {
-	model := newModel(name, avatar, body, parentID)
-
+func (repo *menfessPostRepo) PutData(name string, avatar string, body string, parentID string, repostID string) entity.MenfessPost {
+	model := newModel(name, avatar, body, parentID, repostID)
 	filter := bson.D{{"_id", model.ParentID}}
 	update := bson.D{
 		{"$inc", bson.D{

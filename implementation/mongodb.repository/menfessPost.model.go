@@ -14,10 +14,12 @@ type model struct {
 	DownvoterIDs map[string]bool    `bson:"downvoterIDs"`
 	ReplyCount   int                `bson:"replyCount"`
 	ParentID     primitive.ObjectID `bson:"parentID"`
+	RepostID     primitive.ObjectID `bson:"repostID"`
 }
 
-func newModel(name string, avatar string, body string, parentID string) *model {
+func newModel(name string, avatar string, body string, parentID string, repostID string) *model {
 	parentid, _ := primitive.ObjectIDFromHex(parentID)
+	repostid, _ := primitive.ObjectIDFromHex(repostID)
 	return &model{
 		ID:           primitive.NewObjectID(),
 		Name:         name,
@@ -27,12 +29,14 @@ func newModel(name string, avatar string, body string, parentID string) *model {
 		DownvoterIDs: map[string]bool{},
 		ReplyCount:   0,
 		ParentID:     parentid,
+		RepostID:     repostid,
 	}
 }
 
 func modelFromEntity(e entity.MenfessPost) *model {
 	id, _ := primitive.ObjectIDFromHex(e.ID())
 	parentID, _ := primitive.ObjectIDFromHex(e.ParentID())
+	repostID, _ := primitive.ObjectIDFromHex(e.RepostID())
 	return &model{
 		ID:           id,
 		Name:         e.Name(),
@@ -42,6 +46,7 @@ func modelFromEntity(e entity.MenfessPost) *model {
 		DownvoterIDs: e.DownvoterIDs(),
 		ReplyCount:   e.ReplyCount(),
 		ParentID:     parentID,
+		RepostID:     repostID,
 	}
 }
 
@@ -56,6 +61,7 @@ func (m *model) Entity() entity.MenfessPost {
 		DownvoterIDs: m.DownvoterIDs,
 		ReplyCount:   m.ReplyCount,
 		ParentID:     m.ParentID.Hex(),
+		RepostID:     m.RepostID.Hex(),
 	}.New()
 }
 

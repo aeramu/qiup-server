@@ -17,8 +17,8 @@ func (i *interactor) MenfessPostChild(parentID string, first int, after string) 
 	return postList
 }
 
-func (i *interactor) PostMenfessPost(name string, avatar string, body string, parentID string) entity.MenfessPost {
-	post := i.menfessPostRepo.PutData(name, avatar, body, parentID)
+func (i *interactor) PostMenfessPost(name string, avatar string, body string, parentID string, repostID string) entity.MenfessPost {
+	post := i.menfessPostRepo.PutData(name, avatar, body, parentID, repostID)
 	return post
 }
 
