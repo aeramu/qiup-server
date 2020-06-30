@@ -14,6 +14,7 @@ type MenfessPost interface {
 	ReplyCount() int
 	ParentID() string
 	RepostID() string
+	RoomID() string
 	IsUpvoted(accountID string) bool
 	IsDownvoted(accountID string) bool
 	Upvote(accountID string) bool
@@ -32,6 +33,7 @@ type MenfessPostConstructor struct {
 	ReplyCount   int
 	ParentID     string
 	RepostID     string
+	RoomID       string
 }
 
 //New construtor
@@ -53,6 +55,7 @@ func (c MenfessPostConstructor) New() MenfessPost {
 		replyCount:   c.ReplyCount,
 		parentID:     c.ParentID,
 		repostID:     c.RepostID,
+		roomID:       c.RoomID,
 	}
 }
 
@@ -67,11 +70,7 @@ type menfessPost struct {
 	replyCount   int
 	parentID     string
 	repostID     string
-}
-
-// GetRepostID Get return repostID string
-func (mp *menfessPost) RepostID() string {
-	return mp.repostID
+	roomID       string
 }
 
 func (mp *menfessPost) Upvote(accountID string) bool {
@@ -99,6 +98,12 @@ func (mp *menfessPost) IsUpvoted(accountID string) bool {
 func (mp *menfessPost) IsDownvoted(accountID string) bool {
 	_, ok := mp.downvoterIDs[accountID]
 	return ok
+}
+func (mp *menfessPost) RoomID() string {
+	return mp.roomID
+}
+func (mp *menfessPost) RepostID() string {
+	return mp.repostID
 }
 func (mp *menfessPost) ParentID() string {
 	return mp.parentID

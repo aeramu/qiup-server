@@ -80,8 +80,37 @@ func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, a
 	return modelListToEntity(modelList)
 }
 
-func (repo *menfessPostRepo) PutData(name string, avatar string, body string, parentID string, repostID string) entity.MenfessPost {
-	model := newModel(name, avatar, body, parentID, repostID)
+func (repo *menfessPostRepo) GetDataListByRoomIDs(roomIDs []string, first int, after string, ascSort bool) []entity.MenfessPost {
+	roomids := idListFromHex(roomIDs)
+	afterid, _ := primitive.ObjectIDFromHex(after)
+	comparator := "$lt"
+	sort := -1
+	if ascSort {
+		comparator = "$gt"
+		sort = 1
+	}
+
+	filter := bson.D{
+		{"$and", bson.A{
+			bson.D{{"roomID", bson.D{
+				{"$in", roomids},
+			}}},
+			bson.D{{"_id", bson.D{
+				{comparator, afterid},
+			}}},
+		}},
+	}
+	sortOpt := bson.D{{"_id", sort}}
+	option := options.Find().SetLimit(int64(first)).SetSort(sortOpt)
+	cursor, _ := repo.collection.Find(context.TODO(), filter, option)
+
+	var modelList []*model
+	cursor.All(context.TODO(), &modelList)
+	return modelListToEntity(modelList)
+}
+
+func (repo *menfessPostRepo) PutData(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.MenfessPost {
+	model := newModel(name, avatar, body, parentID, repostID, roomID)
 	filter := bson.D{{"_id", model.ParentID}}
 	update := bson.D{
 		{"$inc", bson.D{

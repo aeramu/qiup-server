@@ -131,10 +131,9 @@ func (r *Resolver) MenfessPost(args struct {
 
 // MenfessPostList graphql
 func (r *Resolver) MenfessPostList(args struct {
-	First  *int32
-	After  *graphql.ID
-	Before *graphql.ID
-	Sort   *bool
+	First *int32
+	After *graphql.ID
+	Sort  *bool
 }) *MenfessPostConnectionResolver {
 	first := 20
 	if args.First != nil {
@@ -143,9 +142,30 @@ func (r *Resolver) MenfessPostList(args struct {
 	after := "ffffffffffffffffffffffff"
 	if args.After != nil {
 		after = string(*args.After)
-		println(after)
 	}
 	postList := r.Interactor.MenfessPostFeed(first, after)
+	return &MenfessPostConnectionResolver{postList, r}
+}
+
+//MenfessPostRooms graphql
+func (r *Resolver) MenfessPostRooms(args struct {
+	IDs   []graphql.ID
+	First *int32
+	After *graphql.ID
+}) *MenfessPostConnectionResolver {
+	first := 20
+	if args.First != nil {
+		first = int(*args.First)
+	}
+	after := "ffffffffffffffffffffffff"
+	if args.After != nil {
+		after = string(*args.After)
+	}
+	var roomIDs []string
+	for _, id := range args.IDs {
+		roomIDs = append(roomIDs, string(id))
+	}
+	postList := r.Interactor.MenfessPostRooms(roomIDs, first, after)
 	return &MenfessPostConnectionResolver{postList, r}
 }
 
@@ -156,6 +176,7 @@ func (r *Resolver) PostMenfessPost(args struct {
 	Body     string
 	ParentID *graphql.ID
 	RepostID *graphql.ID
+	RoomID   *graphql.ID
 }) *MenfessPostResolver {
 	parentID := ""
 	if args.ParentID != nil {
@@ -165,7 +186,11 @@ func (r *Resolver) PostMenfessPost(args struct {
 	if args.RepostID != nil {
 		repostID = string(*args.RepostID)
 	}
-	post := r.Interactor.PostMenfessPost(args.Name, args.Avatar, args.Body, parentID, repostID)
+	roomID := ""
+	if args.RoomID != nil {
+		roomID = string(*args.RoomID)
+	}
+	post := r.Interactor.PostMenfessPost(args.Name, args.Avatar, args.Body, parentID, repostID, roomID)
 	return &MenfessPostResolver{post, r}
 }
 

@@ -28,7 +28,8 @@ var Schema = `
 		sharePostList: [SharePost]!
 
 		menfessPost(id: ID!): MenfessPost!
-		menfessPostList(first: Int, after: ID, before: ID, sort: Int): MenfessPostConnection!
+		menfessPostList(first: Int, after: ID, sort: Int): MenfessPostConnection!
+		menfessPostRooms(ids: [ID!]!, first: Int, after: ID): MenfessPostConnection!
 		menfessAvatarList: [String!]!
 	}
 	type Mutation{
@@ -42,7 +43,7 @@ var Schema = `
 
 		postSharePost(body: String!): SharePost!
 
-		postMenfessPost(name: String!, avatar: String!, body: String!, parentID: ID, repostID: ID): MenfessPost!
+		postMenfessPost(name: String!, avatar: String!, body: String!, parentID: ID, repostID: ID, roomID: ID): MenfessPost!
 		upvoteMenfessPost(postID: ID!): MenfessPost!
 		downvoteMenfessPost(postID: ID!): MenfessPost!
 

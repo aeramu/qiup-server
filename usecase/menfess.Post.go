@@ -17,8 +17,13 @@ func (i *interactor) MenfessPostChild(parentID string, first int, after string) 
 	return postList
 }
 
-func (i *interactor) PostMenfessPost(name string, avatar string, body string, parentID string, repostID string) entity.MenfessPost {
-	post := i.menfessPostRepo.PutData(name, avatar, body, parentID, repostID)
+func (i *interactor) MenfessPostRooms(roomIDs []string, first int, after string) []entity.MenfessPost {
+	postList := i.menfessPostRepo.GetDataListByRoomIDs(roomIDs, first, after, false)
+	return postList
+}
+
+func (i *interactor) PostMenfessPost(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.MenfessPost {
+	post := i.menfessPostRepo.PutData(name, avatar, body, parentID, repostID, roomID)
 	return post
 }
 

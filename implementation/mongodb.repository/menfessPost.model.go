@@ -15,11 +15,13 @@ type model struct {
 	ReplyCount   int                `bson:"replyCount"`
 	ParentID     primitive.ObjectID `bson:"parentID"`
 	RepostID     primitive.ObjectID `bson:"repostID"`
+	RoomID       primitive.ObjectID `bson:"roomID"`
 }
 
-func newModel(name string, avatar string, body string, parentID string, repostID string) *model {
+func newModel(name string, avatar string, body string, parentID string, repostID string, roomID string) *model {
 	parentid, _ := primitive.ObjectIDFromHex(parentID)
 	repostid, _ := primitive.ObjectIDFromHex(repostID)
+	roomid, _ := primitive.ObjectIDFromHex(roomID)
 	return &model{
 		ID:           primitive.NewObjectID(),
 		Name:         name,
@@ -30,6 +32,7 @@ func newModel(name string, avatar string, body string, parentID string, repostID
 		ReplyCount:   0,
 		ParentID:     parentid,
 		RepostID:     repostid,
+		RoomID:       roomid,
 	}
 }
 
@@ -37,6 +40,7 @@ func modelFromEntity(e entity.MenfessPost) *model {
 	id, _ := primitive.ObjectIDFromHex(e.ID())
 	parentID, _ := primitive.ObjectIDFromHex(e.ParentID())
 	repostID, _ := primitive.ObjectIDFromHex(e.RepostID())
+	roomID, _ := primitive.ObjectIDFromHex(e.RoomID())
 	return &model{
 		ID:           id,
 		Name:         e.Name(),
@@ -47,6 +51,7 @@ func modelFromEntity(e entity.MenfessPost) *model {
 		ReplyCount:   e.ReplyCount(),
 		ParentID:     parentID,
 		RepostID:     repostID,
+		RoomID:       roomID,
 	}
 }
 
@@ -62,6 +67,7 @@ func (m *model) Entity() entity.MenfessPost {
 		ReplyCount:   m.ReplyCount,
 		ParentID:     m.ParentID.Hex(),
 		RepostID:     m.RepostID.Hex(),
+		RoomID:       m.RoomID.Hex(),
 	}.New()
 }
 
@@ -71,4 +77,13 @@ func modelListToEntity(modelList []*model) []entity.MenfessPost {
 		entityList = append(entityList, model.Entity())
 	}
 	return entityList
+}
+
+func idListFromHex(hexList []string) []primitive.ObjectID {
+	var idList []primitive.ObjectID
+	for _, hex := range hexList {
+		id, _ := primitive.ObjectIDFromHex(hex)
+		idList = append(idList, id)
+	}
+	return idList
 }
