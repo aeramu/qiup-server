@@ -6,7 +6,6 @@ import (
 
 type interactor struct {
 	menfessPostRepo MenfessPostRepo
-	menfessRoomRepo MenfessRoomRepo
 }
 
 //MenfessPostRepo interface
@@ -18,9 +17,4 @@ type MenfessPostRepo interface {
 	PutData(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.MenfessPost
 	UpdateUpvoterIDs(postID string, accountID string, exist bool)
 	UpdateDownvoterIDs(postID string, accountID string, exist bool)
-}
-
-//MenfessRoomRepo interface
-type MenfessRoomRepo interface {
-	GetDataList() []entity.MenfessRoom
 }

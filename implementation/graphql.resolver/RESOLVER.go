@@ -30,6 +30,7 @@ var Schema = `
 		menfessPost(id: ID!): MenfessPost!
 		menfessPostList(first: Int, after: ID, sort: Int): MenfessPostConnection!
 		menfessPostRooms(ids: [ID!]!, first: Int, after: ID): MenfessPostConnection!
+		menfessRoomList(): MenfessRoomConnection!
 		menfessAvatarList: [String!]!
 	}
 	type Mutation{
@@ -82,8 +83,16 @@ var Schema = `
 		repost: MenfessPost
 		child(first: Int, after: ID, before: ID, sort: Int): MenfessPostConnection!
 	}
+	type MenfessRoom{
+		id: ID!
+		name: String!
+	}
 	type MenfessPostConnection{
 		edges: [MenfessPost]!
+		pageInfo: PageInfo!
+	}
+	type MenfessRoomConnection{
+		edges: [MenfessRoom]!
 		pageInfo: PageInfo!
 	}
 	type PageInfo{
