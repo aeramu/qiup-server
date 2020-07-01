@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -13,19 +14,25 @@ import (
 )
 
 func main() {
+	context := context.WithValue(context.Background(), "request", map[string]string{
+		"id": "5ef89baaec8ff2af8b9934c1",
+	})
+
 	schema := graphql.MustParseSchema(resolver.Schema, &resolver.Resolver{
+		Context: context,
 		Interactor: usecase.InteractorConstructor{
 			MenfessPostRepo: cleanrepo.New(),
 		}.New(),
 	})
-	http.Handle("/query", &relay.Handler{Schema: schema})
+	http.Handle("/", &relay.Handler{Schema: schema})
 
-	graphiqlHandler, err := graphiql.NewGraphiqlHandler("/query")
+	graphiqlHandler, err := graphiql.NewGraphiqlHandler("/")
 	if err != nil {
 		panic(err)
 	}
-	http.Handle("/", graphiqlHandler)
+	http.Handle("/graphiql", graphiqlHandler)
 
-	log.Println("Server ready at 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Server ready at 8000")
+	log.Println("Graphiql ready at 8000/graphiql")
+	log.Fatal(http.ListenAndServe(":8000", nil))
 }

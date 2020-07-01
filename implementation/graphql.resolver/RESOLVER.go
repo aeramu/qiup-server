@@ -30,7 +30,7 @@ var Schema = `
 		menfessPost(id: ID!): MenfessPost!
 		menfessPostList(first: Int, after: ID, sort: Int): MenfessPostConnection!
 		menfessPostRooms(ids: [ID!]!, first: Int, after: ID): MenfessPostConnection!
-		menfessRoomList(): MenfessRoomConnection!
+		menfessRoomList: MenfessRoomConnection!
 		menfessAvatarList: [String!]!
 	}
 	type Mutation{
