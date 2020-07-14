@@ -15,34 +15,34 @@ import (
 var client *mongo.Client = nil
 
 //New MenfessPostRepo Constructor
-func New() usecase.MenfessPostRepo {
+func New() usecase.MenfessRepo {
 	if client == nil {
 		client, _ = mongo.Connect(context.Background(), options.Client().ApplyURI(
 			"mongodb+srv://admin:admin@qiup-wrbox.mongodb.net/",
 		))
 	}
-	return &menfessPostRepo{
+	return &menfessRepo{
 		client:     client,
 		database:   client.Database("qiup"),
 		collection: client.Database("qiup").Collection("justPost"),
 	}
 }
 
-type menfessPostRepo struct {
+type menfessRepo struct {
 	client     *mongo.Client
 	database   *mongo.Database
 	collection *mongo.Collection
 }
 
-func (repo *menfessPostRepo) NewID() string {
+func (repo *menfessRepo) NewID() string {
 	return primitive.NewObjectID().Hex()
 }
 
-func (repo *menfessPostRepo) GetDataByID(id string) entity.MenfessPost {
+func (repo *menfessRepo) GetPostByID(id string) entity.MenfessPost {
 	objectID, _ := primitive.ObjectIDFromHex(id)
 
 	filter := bson.D{{"_id", objectID}}
-	var post model
+	var post post
 	repo.collection.FindOne(context.TODO(), filter).Decode(&post)
 
 	if post.ID.IsZero() {
@@ -51,7 +51,7 @@ func (repo *menfessPostRepo) GetDataByID(id string) entity.MenfessPost {
 	return post.Entity()
 }
 
-func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, after string, ascSort bool) []entity.MenfessPost {
+func (repo *menfessRepo) GetPostListByParentID(parentID string, first int, after string, ascSort bool) []entity.MenfessPost {
 	parentid, _ := primitive.ObjectIDFromHex(parentID)
 	afterid, _ := primitive.ObjectIDFromHex(after)
 	comparator := "$lt"
@@ -75,12 +75,12 @@ func (repo *menfessPostRepo) GetDataListByParentID(parentID string, first int, a
 	option := options.Find().SetLimit(int64(first)).SetSort(sortOpt)
 	cursor, _ := repo.collection.Find(context.TODO(), filter, option)
 
-	var modelList []*model
-	cursor.All(context.TODO(), &modelList)
-	return modelListToEntity(modelList)
+	var postList []*post
+	cursor.All(context.TODO(), &postList)
+	return modelListToEntity(postList)
 }
 
-func (repo *menfessPostRepo) GetDataListByRoomIDs(roomIDs []string, first int, after string, ascSort bool) []entity.MenfessPost {
+func (repo *menfessRepo) GetPostListByRoomIDs(roomIDs []string, first int, after string, ascSort bool) []entity.MenfessPost {
 	roomids := idListFromHex(roomIDs)
 	afterid, _ := primitive.ObjectIDFromHex(after)
 	comparator := "$lt"
@@ -104,12 +104,12 @@ func (repo *menfessPostRepo) GetDataListByRoomIDs(roomIDs []string, first int, a
 	option := options.Find().SetLimit(int64(first)).SetSort(sortOpt)
 	cursor, _ := repo.collection.Find(context.TODO(), filter, option)
 
-	var modelList []*model
-	cursor.All(context.TODO(), &modelList)
-	return modelListToEntity(modelList)
+	var postList []*post
+	cursor.All(context.TODO(), &postList)
+	return modelListToEntity(postList)
 }
 
-func (repo *menfessPostRepo) PutData(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.MenfessPost {
+func (repo *menfessRepo) PutPost(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.MenfessPost {
 	model := newModel(name, avatar, body, parentID, repostID, roomID)
 	filter := bson.D{{"_id", model.ParentID}}
 	update := bson.D{
@@ -127,7 +127,7 @@ func (repo *menfessPostRepo) PutData(name string, avatar string, body string, pa
 	return model.Entity()
 }
 
-func (repo *menfessPostRepo) UpdateUpvoterIDs(postID string, accountID string, exist bool) {
+func (repo *menfessRepo) UpdateUpvoterIDs(postID string, accountID string, exist bool) {
 	operator := "$set"
 	if exist {
 		operator = "$unset"
@@ -143,7 +143,7 @@ func (repo *menfessPostRepo) UpdateUpvoterIDs(postID string, accountID string, e
 	repo.collection.UpdateOne(context.TODO(), filter, update)
 }
 
-func (repo *menfessPostRepo) UpdateDownvoterIDs(postID string, accountID string, exist bool) {
+func (repo *menfessRepo) UpdateDownvoterIDs(postID string, accountID string, exist bool) {
 	operator := "$set"
 	if exist {
 		operator = "$unset"
@@ -157,4 +157,13 @@ func (repo *menfessPostRepo) UpdateDownvoterIDs(postID string, accountID string,
 		}},
 	}
 	repo.collection.UpdateOne(context.TODO(), filter, update)
+}
+
+func (repo *menfessRepo) GetRoomList() []entity.MenfessRoom {
+	filter := bson.D{{}}
+	cursor, _ := repo.client.Database("menfess").Collection("room").Find(context.TODO(), filter)
+
+	var modelList []*room
+	cursor.All(context.TODO(), &modelList)
+	return roomListToEntity(modelList)
 }

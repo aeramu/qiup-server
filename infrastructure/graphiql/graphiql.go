@@ -21,7 +21,7 @@ func main() {
 	schema := graphql.MustParseSchema(resolver.Schema, &resolver.Resolver{
 		Context: context,
 		Interactor: usecase.InteractorConstructor{
-			MenfessPostRepo: cleanrepo.New(),
+			MenfessRepo: cleanrepo.New(),
 		}.New(),
 	})
 	http.Handle("/", &relay.Handler{Schema: schema})

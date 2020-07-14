@@ -5,7 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type model struct {
+type post struct {
 	ID           primitive.ObjectID `bson:"_id"`
 	Name         string
 	Avatar       string
@@ -18,11 +18,11 @@ type model struct {
 	RoomID       primitive.ObjectID `bson:"roomID"`
 }
 
-func newModel(name string, avatar string, body string, parentID string, repostID string, roomID string) *model {
+func newModel(name string, avatar string, body string, parentID string, repostID string, roomID string) *post {
 	parentid, _ := primitive.ObjectIDFromHex(parentID)
 	repostid, _ := primitive.ObjectIDFromHex(repostID)
 	roomid, _ := primitive.ObjectIDFromHex(roomID)
-	return &model{
+	return &post{
 		ID:           primitive.NewObjectID(),
 		Name:         name,
 		Avatar:       avatar,
@@ -36,12 +36,12 @@ func newModel(name string, avatar string, body string, parentID string, repostID
 	}
 }
 
-func modelFromEntity(e entity.MenfessPost) *model {
+func modelFromEntity(e entity.MenfessPost) *post {
 	id, _ := primitive.ObjectIDFromHex(e.ID())
 	parentID, _ := primitive.ObjectIDFromHex(e.ParentID())
 	repostID, _ := primitive.ObjectIDFromHex(e.RepostID())
 	roomID, _ := primitive.ObjectIDFromHex(e.RoomID())
-	return &model{
+	return &post{
 		ID:           id,
 		Name:         e.Name(),
 		Avatar:       e.Avatar(),
@@ -55,7 +55,7 @@ func modelFromEntity(e entity.MenfessPost) *model {
 	}
 }
 
-func (m *model) Entity() entity.MenfessPost {
+func (m *post) Entity() entity.MenfessPost {
 	return entity.MenfessPostConstructor{
 		ID:           m.ID.Hex(),
 		Timestamp:    int(m.ID.Timestamp().Unix()),
@@ -71,7 +71,7 @@ func (m *model) Entity() entity.MenfessPost {
 	}.New()
 }
 
-func modelListToEntity(modelList []*model) []entity.MenfessPost {
+func modelListToEntity(modelList []*post) []entity.MenfessPost {
 	var entityList []entity.MenfessPost
 	for _, model := range modelList {
 		entityList = append(entityList, model.Entity())
@@ -86,4 +86,24 @@ func idListFromHex(hexList []string) []primitive.ObjectID {
 		idList = append(idList, id)
 	}
 	return idList
+}
+
+type room struct {
+	ID   primitive.ObjectID `bson:"_id"`
+	Name string
+}
+
+func (m *room) Entity() entity.MenfessRoom {
+	return entity.MenfessRoomConstructor{
+		ID:   m.ID.Hex(),
+		Name: m.Name,
+	}.New()
+}
+
+func roomListToEntity(modelList []*room) []entity.MenfessRoom {
+	var entityList []entity.MenfessRoom
+	for _, model := range modelList {
+		entityList = append(entityList, model.Entity())
+	}
+	return entityList
 }

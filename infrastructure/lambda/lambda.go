@@ -32,7 +32,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	schema := graphql.MustParseSchema(resolver.Schema, &resolver.Resolver{
 		Context: context,
 		Interactor: usecase.InteractorConstructor{
-			MenfessPostRepo: cleanrepo.New(),
+			MenfessRepo: cleanrepo.New(),
 		}.New(),
 	})
 	response := schema.Exec(context, parameter.Query, parameter.OperationName, parameter.Variables)

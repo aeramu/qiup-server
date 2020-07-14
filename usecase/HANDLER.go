@@ -16,6 +16,7 @@ type menfessPost interface {
 	PostMenfessPost(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.MenfessPost
 	UpvoteMenfessPost(accountID string, postID string) entity.MenfessPost
 	DownvoteMenfessPost(accountID string, postID string) entity.MenfessPost
+	MenfessRoomList() []entity.MenfessRoom
 }
 
 type menfessRoom interface {
@@ -24,12 +25,12 @@ type menfessRoom interface {
 
 //InteractorConstructor constructor
 type InteractorConstructor struct {
-	MenfessPostRepo MenfessPostRepo
+	MenfessRepo MenfessRepo
 }
 
 //New Construct Interactor
 func (i InteractorConstructor) New() Interactor {
 	return &interactor{
-		menfessPostRepo: i.MenfessPostRepo,
+		menfessRepo: i.MenfessRepo,
 	}
 }
