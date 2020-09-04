@@ -167,3 +167,16 @@ func (repo *menfessRepo) GetRoomList() []entity.MenfessRoom {
 	cursor.All(context.TODO(), &modelList)
 	return roomListToEntity(modelList)
 }
+
+func (repo *menfessRepo) GetRoom(id string) entity.MenfessRoom {
+	objectID, _ := primitive.ObjectIDFromHex(id)
+
+	filter := bson.D{{"_id", objectID}}
+	var room room
+	repo.client.Database("menfess").Collection("room").FindOne(context.TODO(), filter).Decode(&room)
+
+	if room.ID.IsZero() {
+		return nil
+	}
+	return room.Entity()
+}

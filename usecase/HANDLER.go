@@ -17,6 +17,7 @@ type menfessPost interface {
 	UpvoteMenfessPost(accountID string, postID string) entity.MenfessPost
 	DownvoteMenfessPost(accountID string, postID string) entity.MenfessPost
 	MenfessRoomList() []entity.MenfessRoom
+	MenfessRoom(id string) entity.MenfessRoom
 }
 
 type menfessRoom interface {

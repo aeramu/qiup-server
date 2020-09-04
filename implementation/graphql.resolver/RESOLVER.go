@@ -82,6 +82,7 @@ var Schema = `
 		parent: MenfessPost
 		repost: MenfessPost
 		child(first: Int, after: ID, before: ID, sort: Int): MenfessPostConnection!
+		room: String!
 	}
 	type MenfessRoom{
 		id: ID!

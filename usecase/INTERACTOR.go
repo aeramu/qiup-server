@@ -18,4 +18,5 @@ type MenfessRepo interface {
 	UpdateUpvoterIDs(postID string, accountID string, exist bool)
 	UpdateDownvoterIDs(postID string, accountID string, exist bool)
 	GetRoomList() []entity.MenfessRoom
+	GetRoom(id string) entity.MenfessRoom
 }

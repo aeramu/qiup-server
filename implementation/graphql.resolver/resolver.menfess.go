@@ -36,6 +36,15 @@ func (r *MenfessPostResolver) Body() string {
 	return r.post.Body()
 }
 
+//Room graphql
+func (r *MenfessPostResolver) Room() string {
+	room := r.pr.Interactor.MenfessRoom(r.post.RoomID())
+	if room == nil {
+		return "General"
+	}
+	return room.Name()
+}
+
 // ReplyCount graphql
 func (r *MenfessPostResolver) ReplyCount() int32 {
 	return int32(r.post.ReplyCount())
