@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	resolver "github.com/aeramu/qiup-server/implementation/graphql.resolver"
-	repository "github.com/aeramu/qiup-server/implementation/mongodb.repository"
+	"github.com/aeramu/qiup-server/implementation/mongodb/repository"
 	"github.com/aeramu/qiup-server/usecase"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"

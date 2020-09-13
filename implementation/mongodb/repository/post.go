@@ -3,46 +3,19 @@ package repository
 import (
 	"context"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-
 	"github.com/aeramu/qiup-server/entity"
-	"github.com/aeramu/qiup-server/usecase"
+	"github.com/aeramu/qiup-server/implementation/mongodb/gateway"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-var client *mongo.Client = nil
-
-//New MenfessPostRepo Constructor
-func New() usecase.Repository {
-	if client == nil {
-		client, _ = mongo.Connect(context.Background(), options.Client().ApplyURI(
-			"mongodb+srv://admin:admin@qiup-wrbox.mongodb.net/",
-		))
-	}
-	return &menfessRepo{
-		client:     client,
-		database:   client.Database("qiup"),
-		collection: client.Database("qiup").Collection("justPost"),
-	}
-}
-
-type menfessRepo struct {
-	client     *mongo.Client
-	database   *mongo.Database
-	collection *mongo.Collection
-}
-
-func (repo *menfessRepo) NewID() string {
-	return primitive.NewObjectID().Hex()
-}
 
 func (repo *menfessRepo) GetPostByID(id string) entity.Post {
 	objectID, _ := primitive.ObjectIDFromHex(id)
 
 	filter := bson.D{{"_id", objectID}}
-	var post post
+	var post gateway.Post
 	repo.collection.FindOne(context.TODO(), filter).Decode(&post)
 
 	if post.ID.IsZero() {
@@ -75,13 +48,13 @@ func (repo *menfessRepo) GetPostListByParentID(parentID string, first int, after
 	option := options.Find().SetLimit(int64(first)).SetSort(sortOpt)
 	cursor, _ := repo.collection.Find(context.TODO(), filter, option)
 
-	var postList []*post
-	cursor.All(context.TODO(), &postList)
-	return modelListToEntity(postList)
+	var posts gateway.Posts
+	cursor.All(context.TODO(), &posts)
+	return posts.Entity()
 }
 
 func (repo *menfessRepo) GetPostListByRoomIDs(roomIDs []string, first int, after string, ascSort bool) []entity.Post {
-	roomids := idListFromHex(roomIDs)
+	roomids := gateway.IDsFromHex(roomIDs)
 	afterid, _ := primitive.ObjectIDFromHex(after)
 	comparator := "$lt"
 	sort := -1
@@ -104,14 +77,14 @@ func (repo *menfessRepo) GetPostListByRoomIDs(roomIDs []string, first int, after
 	option := options.Find().SetLimit(int64(first)).SetSort(sortOpt)
 	cursor, _ := repo.collection.Find(context.TODO(), filter, option)
 
-	var postList []*post
-	cursor.All(context.TODO(), &postList)
-	return modelListToEntity(postList)
+	var posts gateway.Posts
+	cursor.All(context.TODO(), &posts)
+	return posts.Entity()
 }
 
 func (repo *menfessRepo) PutPost(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.Post {
-	model := newModel(name, avatar, body, parentID, repostID, roomID)
-	filter := bson.D{{"_id", model.ParentID}}
+	post := gateway.NewPost(name, avatar, body, parentID, repostID, roomID)
+	filter := bson.D{{"_id", post.ParentID}}
 	update := bson.D{
 		{"$inc", bson.D{
 			{"replyCount", 1},
@@ -119,12 +92,12 @@ func (repo *menfessRepo) PutPost(name string, avatar string, body string, parent
 	}
 	option := options.BulkWrite().SetOrdered(false)
 	models := []mongo.WriteModel{
-		mongo.NewInsertOneModel().SetDocument(model),
+		mongo.NewInsertOneModel().SetDocument(post),
 		mongo.NewUpdateOneModel().SetFilter(filter).SetUpdate(update).SetUpsert(true),
 	}
 	repo.collection.BulkWrite(context.TODO(), models, option)
 
-	return model.Entity()
+	return post.Entity()
 }
 
 func (repo *menfessRepo) UpdateUpvoterIDs(postID string, accountID string, exist bool) {
@@ -157,26 +130,4 @@ func (repo *menfessRepo) UpdateDownvoterIDs(postID string, accountID string, exi
 		}},
 	}
 	repo.collection.UpdateOne(context.TODO(), filter, update)
-}
-
-func (repo *menfessRepo) GetRoomList() []entity.Room {
-	filter := bson.D{{}}
-	cursor, _ := repo.client.Database("menfess").Collection("room").Find(context.TODO(), filter)
-
-	var modelList []*room
-	cursor.All(context.TODO(), &modelList)
-	return roomListToEntity(modelList)
-}
-
-func (repo *menfessRepo) GetRoom(id string) entity.Room {
-	objectID, _ := primitive.ObjectIDFromHex(id)
-
-	filter := bson.D{{"_id", objectID}}
-	var room room
-	repo.client.Database("menfess").Collection("room").FindOne(context.TODO(), filter).Decode(&room)
-
-	if room.ID.IsZero() {
-		return nil
-	}
-	return room.Entity()
 }

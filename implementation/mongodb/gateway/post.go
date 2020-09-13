@@ -1,11 +1,11 @@
-package repository
+package gateway
 
 import (
 	"github.com/aeramu/qiup-server/entity"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type post struct {
+type Post struct {
 	ID           primitive.ObjectID `bson:"_id"`
 	Name         string
 	Avatar       string
@@ -18,11 +18,13 @@ type post struct {
 	RoomID       primitive.ObjectID `bson:"roomID"`
 }
 
-func newModel(name string, avatar string, body string, parentID string, repostID string, roomID string) *post {
+type Posts []*Post
+
+func NewPost(name string, avatar string, body string, parentID string, repostID string, roomID string) *Post {
 	parentid, _ := primitive.ObjectIDFromHex(parentID)
 	repostid, _ := primitive.ObjectIDFromHex(repostID)
 	roomid, _ := primitive.ObjectIDFromHex(roomID)
-	return &post{
+	return &Post{
 		ID:           primitive.NewObjectID(),
 		Name:         name,
 		Avatar:       avatar,
@@ -36,12 +38,12 @@ func newModel(name string, avatar string, body string, parentID string, repostID
 	}
 }
 
-func modelFromEntity(e entity.Post) *post {
+func PostFromEntity(e entity.Post) *Post {
 	id, _ := primitive.ObjectIDFromHex(e.ID())
 	parentID, _ := primitive.ObjectIDFromHex(e.ParentID())
 	repostID, _ := primitive.ObjectIDFromHex(e.RepostID())
 	roomID, _ := primitive.ObjectIDFromHex(e.RoomID())
-	return &post{
+	return &Post{
 		ID:           id,
 		Name:         e.Name(),
 		Avatar:       e.Avatar(),
@@ -55,7 +57,7 @@ func modelFromEntity(e entity.Post) *post {
 	}
 }
 
-func (m *post) Entity() entity.Post {
+func (m *Post) Entity() entity.Post {
 	return entity.PostConstructor{
 		ID:           m.ID.Hex(),
 		Timestamp:    int(m.ID.Timestamp().Unix()),
@@ -71,39 +73,10 @@ func (m *post) Entity() entity.Post {
 	}.New()
 }
 
-func modelListToEntity(modelList []*post) []entity.Post {
+func (posts Posts) Entity() []entity.Post {
 	var entityList []entity.Post
-	for _, model := range modelList {
-		entityList = append(entityList, model.Entity())
-	}
-	return entityList
-}
-
-func idListFromHex(hexList []string) []primitive.ObjectID {
-	var idList []primitive.ObjectID
-	for _, hex := range hexList {
-		id, _ := primitive.ObjectIDFromHex(hex)
-		idList = append(idList, id)
-	}
-	return idList
-}
-
-type room struct {
-	ID   primitive.ObjectID `bson:"_id"`
-	Name string
-}
-
-func (m *room) Entity() entity.Room {
-	return entity.RoomConstructor{
-		ID:   m.ID.Hex(),
-		Name: m.Name,
-	}.New()
-}
-
-func roomListToEntity(modelList []*room) []entity.Room {
-	var entityList []entity.Room
-	for _, model := range modelList {
-		entityList = append(entityList, model.Entity())
+	for _, post := range posts {
+		entityList = append(entityList, post.Entity())
 	}
 	return entityList
 }
