@@ -24,6 +24,7 @@ func main() {
 			Repository: repository.New(),
 		}.New(),
 	})
+	defer repository.Disconnect()
 	http.Handle("/", &relay.Handler{Schema: schema})
 
 	graphiqlHandler, err := graphiql.NewGraphiqlHandler("/")

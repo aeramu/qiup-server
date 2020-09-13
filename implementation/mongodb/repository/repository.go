@@ -26,6 +26,11 @@ func New() usecase.Repository {
 	}
 }
 
+//Disconnect disconnect
+func Disconnect() {
+	client.Disconnect(context.TODO())
+}
+
 type menfessRepo struct {
 	client     *mongo.Client
 	database   *mongo.Database

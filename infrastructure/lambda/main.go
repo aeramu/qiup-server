@@ -35,6 +35,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 			Repository: repository.New(),
 		}.New(),
 	})
+	defer repository.Disconnect()
 	response := schema.Exec(context, parameter.Query, parameter.OperationName, parameter.Variables)
 	responseJSON, _ := json.Marshal(response)
 
