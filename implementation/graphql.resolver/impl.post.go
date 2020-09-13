@@ -7,7 +7,7 @@ import (
 
 // MenfessPostResolver graphql
 type MenfessPostResolver struct {
-	post entity.MenfessPost
+	post entity.Post
 	pr   *Resolver
 }
 
@@ -38,7 +38,7 @@ func (r *MenfessPostResolver) Body() string {
 
 //Room graphql
 func (r *MenfessPostResolver) Room() string {
-	room := r.pr.Interactor.MenfessRoom(r.post.RoomID())
+	room := r.pr.Interactor.Room(r.post.RoomID())
 	if room == nil {
 		return "General"
 	}
@@ -74,7 +74,7 @@ func (r *MenfessPostResolver) Downvoted() bool {
 
 // Parent graphql
 func (r *MenfessPostResolver) Parent() *MenfessPostResolver {
-	post := r.pr.Interactor.MenfessPost(r.post.ParentID())
+	post := r.pr.Interactor.Post(r.post.ParentID())
 	if post == nil {
 		return nil
 	}
@@ -83,7 +83,7 @@ func (r *MenfessPostResolver) Parent() *MenfessPostResolver {
 
 //Repost graphql
 func (r *MenfessPostResolver) Repost() *MenfessPostResolver {
-	post := r.pr.Interactor.MenfessPost(r.post.RepostID())
+	post := r.pr.Interactor.Post(r.post.RepostID())
 	if post == nil {
 		return nil
 	}
@@ -102,13 +102,13 @@ func (r *MenfessPostResolver) Child(args struct {
 		first = int(*args.First)
 	}
 	after := "000000000000000000000000"
-	postList := r.pr.Interactor.MenfessPostChild(r.post.ID(), first, after)
+	postList := r.pr.Interactor.PostChild(r.post.ID(), first, after)
 	return &MenfessPostConnectionResolver{postList, r.pr}
 }
 
 // MenfessPostConnectionResolver graphql
 type MenfessPostConnectionResolver struct {
-	menfessPostList []entity.MenfessPost
+	menfessPostList []entity.Post
 	pr              *Resolver
 }
 
@@ -134,7 +134,7 @@ func (r *MenfessPostConnectionResolver) PageInfo() *PageInfoResolver {
 func (r *Resolver) MenfessPost(args struct {
 	ID graphql.ID
 }) *MenfessPostResolver {
-	post := r.Interactor.MenfessPost(string(args.ID))
+	post := r.Interactor.Post(string(args.ID))
 	return &MenfessPostResolver{post, r}
 }
 
@@ -152,7 +152,7 @@ func (r *Resolver) MenfessPostList(args struct {
 	if args.After != nil {
 		after = string(*args.After)
 	}
-	postList := r.Interactor.MenfessPostFeed(first, after)
+	postList := r.Interactor.PostFeed(first, after)
 	return &MenfessPostConnectionResolver{postList, r}
 }
 
@@ -174,7 +174,7 @@ func (r *Resolver) MenfessPostRooms(args struct {
 	for _, id := range args.IDs {
 		roomIDs = append(roomIDs, string(id))
 	}
-	postList := r.Interactor.MenfessPostRooms(roomIDs, first, after)
+	postList := r.Interactor.PostRooms(roomIDs, first, after)
 	return &MenfessPostConnectionResolver{postList, r}
 }
 
@@ -199,7 +199,7 @@ func (r *Resolver) PostMenfessPost(args struct {
 	if args.RoomID != nil {
 		roomID = string(*args.RoomID)
 	}
-	post := r.Interactor.PostMenfessPost(args.Name, args.Avatar, args.Body, parentID, repostID, roomID)
+	post := r.Interactor.PostPost(args.Name, args.Avatar, args.Body, parentID, repostID, roomID)
 	return &MenfessPostResolver{post, r}
 }
 
@@ -208,7 +208,7 @@ func (r *Resolver) UpvoteMenfessPost(args struct {
 	PostID graphql.ID
 }) *MenfessPostResolver {
 	accountID := r.Context.Value("request").(map[string]string)["id"]
-	post := r.Interactor.UpvoteMenfessPost(accountID, string(args.PostID))
+	post := r.Interactor.UpvotePost(accountID, string(args.PostID))
 	return &MenfessPostResolver{post, r}
 }
 
@@ -217,7 +217,7 @@ func (r *Resolver) DownvoteMenfessPost(args struct {
 	PostID graphql.ID
 }) *MenfessPostResolver {
 	accountID := r.Context.Value("request").(map[string]string)["id"]
-	post := r.Interactor.DownvoteMenfessPost(accountID, string(args.PostID))
+	post := r.Interactor.DownvotePost(accountID, string(args.PostID))
 	return &MenfessPostResolver{post, r}
 }
 
@@ -253,59 +253,4 @@ func (r *Resolver) MenfessAvatarList() []string {
 		"https://qiup-image.s3.amazonaws.com/avatar/16pink.jpg",
 	}
 	return avatarList
-}
-
-//MenfessRoomList graphql
-func (r *Resolver) MenfessRoomList() *MenfessRoomConnectionResolver {
-	// room1 := entity.MenfessPostConstructor{
-	// 	ID:   "5ef89baaec8ff2af8b9934c1",
-	// 	Name: "ITB",
-	// }.New()
-	// room2 := entity.MenfessPostConstructor{
-	// 	ID:   "5efadcbdc0245024fd758d02",
-	// 	Name: "UI",
-	// }.New()
-	// roomList := []entity.MenfessRoom{room1, room2}
-	roomList := r.Interactor.MenfessRoomList()
-	return &MenfessRoomConnectionResolver{roomList, r}
-}
-
-//MenfessRoomResolver graphql
-type MenfessRoomResolver struct {
-	room entity.MenfessRoom
-	pr   *Resolver
-}
-
-//ID get
-func (r *MenfessRoomResolver) ID() graphql.ID {
-	return graphql.ID(r.room.ID())
-}
-
-//Name get
-func (r *MenfessRoomResolver) Name() string {
-	return r.room.Name()
-}
-
-// MenfessRoomConnectionResolver graphql
-type MenfessRoomConnectionResolver struct {
-	menfessRoomList []entity.MenfessRoom
-	pr              *Resolver
-}
-
-// Edges graphql
-func (r *MenfessRoomConnectionResolver) Edges() []*MenfessRoomResolver {
-	var menfessRoomResolverList []*MenfessRoomResolver
-	for _, room := range r.menfessRoomList {
-		menfessRoomResolverList = append(menfessRoomResolverList, &MenfessRoomResolver{room, r.pr})
-	}
-	return menfessRoomResolverList
-}
-
-// PageInfo graphql
-func (r *MenfessRoomConnectionResolver) PageInfo() *PageInfoResolver {
-	var nodeList []node
-	for _, node := range r.menfessRoomList {
-		nodeList = append(nodeList, node)
-	}
-	return &PageInfoResolver{nodeList}
 }

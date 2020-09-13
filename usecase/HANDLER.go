@@ -4,34 +4,33 @@ import "github.com/aeramu/qiup-server/entity"
 
 //Interactor interface
 type Interactor interface {
-	menfessPost
-	menfessRoom
+	post
+	room
 }
 
-type menfessPost interface {
-	MenfessPost(id string) entity.MenfessPost
-	MenfessPostFeed(first int, after string) []entity.MenfessPost
-	MenfessPostChild(parentID string, first int, after string) []entity.MenfessPost
-	MenfessPostRooms(roomIDs []string, first int, after string) []entity.MenfessPost
-	PostMenfessPost(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.MenfessPost
-	UpvoteMenfessPost(accountID string, postID string) entity.MenfessPost
-	DownvoteMenfessPost(accountID string, postID string) entity.MenfessPost
-	MenfessRoomList() []entity.MenfessRoom
-	MenfessRoom(id string) entity.MenfessRoom
+type post interface {
+	Post(id string) entity.Post
+	PostFeed(first int, after string) []entity.Post
+	PostChild(parentID string, first int, after string) []entity.Post
+	PostRooms(roomIDs []string, first int, after string) []entity.Post
+	PostPost(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.Post
+	UpvotePost(accountID string, postID string) entity.Post
+	DownvotePost(accountID string, postID string) entity.Post
 }
 
-type menfessRoom interface {
-	//MenfessRoomList() []entity.MenfessRoom
+type room interface {
+	RoomList() []entity.Room
+	Room(id string) entity.Room
 }
 
 //InteractorConstructor constructor
 type InteractorConstructor struct {
-	MenfessRepo MenfessRepo
+	Repository Repository
 }
 
 //New Construct Interactor
 func (i InteractorConstructor) New() Interactor {
 	return &interactor{
-		menfessRepo: i.MenfessRepo,
+		repo: i.Repository,
 	}
 }

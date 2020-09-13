@@ -36,7 +36,7 @@ func newModel(name string, avatar string, body string, parentID string, repostID
 	}
 }
 
-func modelFromEntity(e entity.MenfessPost) *post {
+func modelFromEntity(e entity.Post) *post {
 	id, _ := primitive.ObjectIDFromHex(e.ID())
 	parentID, _ := primitive.ObjectIDFromHex(e.ParentID())
 	repostID, _ := primitive.ObjectIDFromHex(e.RepostID())
@@ -55,8 +55,8 @@ func modelFromEntity(e entity.MenfessPost) *post {
 	}
 }
 
-func (m *post) Entity() entity.MenfessPost {
-	return entity.MenfessPostConstructor{
+func (m *post) Entity() entity.Post {
+	return entity.PostConstructor{
 		ID:           m.ID.Hex(),
 		Timestamp:    int(m.ID.Timestamp().Unix()),
 		Name:         m.Name,
@@ -71,8 +71,8 @@ func (m *post) Entity() entity.MenfessPost {
 	}.New()
 }
 
-func modelListToEntity(modelList []*post) []entity.MenfessPost {
-	var entityList []entity.MenfessPost
+func modelListToEntity(modelList []*post) []entity.Post {
+	var entityList []entity.Post
 	for _, model := range modelList {
 		entityList = append(entityList, model.Entity())
 	}
@@ -93,15 +93,15 @@ type room struct {
 	Name string
 }
 
-func (m *room) Entity() entity.MenfessRoom {
-	return entity.MenfessRoomConstructor{
+func (m *room) Entity() entity.Room {
+	return entity.RoomConstructor{
 		ID:   m.ID.Hex(),
 		Name: m.Name,
 	}.New()
 }
 
-func roomListToEntity(modelList []*room) []entity.MenfessRoom {
-	var entityList []entity.MenfessRoom
+func roomListToEntity(modelList []*room) []entity.Room {
+	var entityList []entity.Room
 	for _, model := range modelList {
 		entityList = append(entityList, model.Entity())
 	}

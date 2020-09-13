@@ -5,18 +5,18 @@ import (
 )
 
 type interactor struct {
-	menfessRepo MenfessRepo
+	repo Repository
 }
 
-//MenfessRepo interface
-type MenfessRepo interface {
+//Repository interface
+type Repository interface {
 	NewID() string
-	GetPostByID(id string) entity.MenfessPost
-	GetPostListByParentID(parentID string, first int, after string, ascSort bool) []entity.MenfessPost
-	GetPostListByRoomIDs(roomIDs []string, first int, after string, ascSort bool) []entity.MenfessPost
-	PutPost(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.MenfessPost
+	GetPostByID(id string) entity.Post
+	GetPostListByParentID(parentID string, first int, after string, ascSort bool) []entity.Post
+	GetPostListByRoomIDs(roomIDs []string, first int, after string, ascSort bool) []entity.Post
+	PutPost(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.Post
 	UpdateUpvoterIDs(postID string, accountID string, exist bool)
 	UpdateDownvoterIDs(postID string, accountID string, exist bool)
-	GetRoomList() []entity.MenfessRoom
-	GetRoom(id string) entity.MenfessRoom
+	GetRoomList() []entity.Room
+	GetRoom(id string) entity.Room
 }

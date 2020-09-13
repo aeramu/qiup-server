@@ -15,7 +15,7 @@ import (
 var client *mongo.Client = nil
 
 //New MenfessPostRepo Constructor
-func New() usecase.MenfessRepo {
+func New() usecase.Repository {
 	if client == nil {
 		client, _ = mongo.Connect(context.Background(), options.Client().ApplyURI(
 			"mongodb+srv://admin:admin@qiup-wrbox.mongodb.net/",
@@ -38,7 +38,7 @@ func (repo *menfessRepo) NewID() string {
 	return primitive.NewObjectID().Hex()
 }
 
-func (repo *menfessRepo) GetPostByID(id string) entity.MenfessPost {
+func (repo *menfessRepo) GetPostByID(id string) entity.Post {
 	objectID, _ := primitive.ObjectIDFromHex(id)
 
 	filter := bson.D{{"_id", objectID}}
@@ -51,7 +51,7 @@ func (repo *menfessRepo) GetPostByID(id string) entity.MenfessPost {
 	return post.Entity()
 }
 
-func (repo *menfessRepo) GetPostListByParentID(parentID string, first int, after string, ascSort bool) []entity.MenfessPost {
+func (repo *menfessRepo) GetPostListByParentID(parentID string, first int, after string, ascSort bool) []entity.Post {
 	parentid, _ := primitive.ObjectIDFromHex(parentID)
 	afterid, _ := primitive.ObjectIDFromHex(after)
 	comparator := "$lt"
@@ -80,7 +80,7 @@ func (repo *menfessRepo) GetPostListByParentID(parentID string, first int, after
 	return modelListToEntity(postList)
 }
 
-func (repo *menfessRepo) GetPostListByRoomIDs(roomIDs []string, first int, after string, ascSort bool) []entity.MenfessPost {
+func (repo *menfessRepo) GetPostListByRoomIDs(roomIDs []string, first int, after string, ascSort bool) []entity.Post {
 	roomids := idListFromHex(roomIDs)
 	afterid, _ := primitive.ObjectIDFromHex(after)
 	comparator := "$lt"
@@ -109,7 +109,7 @@ func (repo *menfessRepo) GetPostListByRoomIDs(roomIDs []string, first int, after
 	return modelListToEntity(postList)
 }
 
-func (repo *menfessRepo) PutPost(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.MenfessPost {
+func (repo *menfessRepo) PutPost(name string, avatar string, body string, parentID string, repostID string, roomID string) entity.Post {
 	model := newModel(name, avatar, body, parentID, repostID, roomID)
 	filter := bson.D{{"_id", model.ParentID}}
 	update := bson.D{
@@ -159,7 +159,7 @@ func (repo *menfessRepo) UpdateDownvoterIDs(postID string, accountID string, exi
 	repo.collection.UpdateOne(context.TODO(), filter, update)
 }
 
-func (repo *menfessRepo) GetRoomList() []entity.MenfessRoom {
+func (repo *menfessRepo) GetRoomList() []entity.Room {
 	filter := bson.D{{}}
 	cursor, _ := repo.client.Database("menfess").Collection("room").Find(context.TODO(), filter)
 
@@ -168,7 +168,7 @@ func (repo *menfessRepo) GetRoomList() []entity.MenfessRoom {
 	return roomListToEntity(modelList)
 }
 
-func (repo *menfessRepo) GetRoom(id string) entity.MenfessRoom {
+func (repo *menfessRepo) GetRoom(id string) entity.Room {
 	objectID, _ := primitive.ObjectIDFromHex(id)
 
 	filter := bson.D{{"_id", objectID}}
