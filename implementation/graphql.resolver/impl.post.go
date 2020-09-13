@@ -38,6 +38,9 @@ func (r *MenfessPostResolver) Body() string {
 
 //Room graphql
 func (r *MenfessPostResolver) Room() string {
+	if r.post.RoomID() == "000000000000000000000000" {
+		return "General"
+	}
 	room := r.pr.Interactor.Room(r.post.RoomID())
 	if room == nil {
 		return "General"
@@ -74,6 +77,9 @@ func (r *MenfessPostResolver) Downvoted() bool {
 
 // Parent graphql
 func (r *MenfessPostResolver) Parent() *MenfessPostResolver {
+	if r.post.ParentID() == "000000000000000000000000" {
+		return nil
+	}
 	post := r.pr.Interactor.Post(r.post.ParentID())
 	if post == nil {
 		return nil
@@ -83,6 +89,9 @@ func (r *MenfessPostResolver) Parent() *MenfessPostResolver {
 
 //Repost graphql
 func (r *MenfessPostResolver) Repost() *MenfessPostResolver {
+	if r.post.RepostID() == "000000000000000000000000" {
+		return nil
+	}
 	post := r.pr.Interactor.Post(r.post.RepostID())
 	if post == nil {
 		return nil
