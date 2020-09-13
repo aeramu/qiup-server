@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	resolver "github.com/aeramu/qiup-server/implementation/graphql.resolver"
-	cleanrepo "github.com/aeramu/qiup-server/implementation/mongodb.repository"
+	repository "github.com/aeramu/qiup-server/implementation/mongodb.repository"
 	"github.com/aeramu/qiup-server/usecase"
 	"github.com/friendsofgo/graphiql"
 	"github.com/graph-gophers/graphql-go"
@@ -21,7 +21,7 @@ func main() {
 	schema := graphql.MustParseSchema(resolver.Schema, &resolver.Resolver{
 		Context: context,
 		Interactor: usecase.InteractorConstructor{
-			MenfessRepo: cleanrepo.New(),
+			Repository: repository.New(),
 		}.New(),
 	})
 	http.Handle("/", &relay.Handler{Schema: schema})

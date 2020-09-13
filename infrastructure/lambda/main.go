@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	resolver "github.com/aeramu/qiup-server/implementation/graphql.resolver"
-	cleanrepo "github.com/aeramu/qiup-server/implementation/mongodb.repository"
+	repository "github.com/aeramu/qiup-server/implementation/mongodb.repository"
 	"github.com/aeramu/qiup-server/usecase"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -32,7 +32,7 @@ func handler(ctx context.Context, request events.APIGatewayProxyRequest) (events
 	schema := graphql.MustParseSchema(resolver.Schema, &resolver.Resolver{
 		Context: context,
 		Interactor: usecase.InteractorConstructor{
-			MenfessRepo: cleanrepo.New(),
+			Repository: repository.New(),
 		}.New(),
 	})
 	response := schema.Exec(context, parameter.Query, parameter.OperationName, parameter.Variables)
