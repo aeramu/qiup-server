@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	resolver "github.com/aeramu/qiup-server/implementation/graphql.resolver"
-	repository "github.com/aeramu/qiup-server/implementation/mongodb.repository"
+	"github.com/aeramu/qiup-server/implementation/mongodb/repository"
 	"github.com/aeramu/qiup-server/usecase"
 	"github.com/friendsofgo/graphiql"
 	"github.com/graph-gophers/graphql-go"
